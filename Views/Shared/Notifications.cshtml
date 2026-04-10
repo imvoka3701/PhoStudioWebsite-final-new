@@ -1,0 +1,512 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Trung Tâm Thông Báo";
+}
+
+@section Styles {
+    <style>
+        :root {
+            --primary-color: #c9a96e;
+            --dark-bg: #0f0f0f;
+            --card-bg: rgba(30, 30, 30, 0.8);
+            --border-color: rgba(201, 169, 110, 0.2);
+            --text-muted: #999;
+        }
+
+        .notification-hero {
+            padding: 100px 0 60px;
+            background: linear-gradient(135deg, rgba(15,15,15,1) 0%, rgba(5,5,5,1) 100%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .notification-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .notification-container {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .notification-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .notification-filters {
+            display: flex;
+            gap: 12px;
+        }
+
+        .filter-btn {
+            background: rgba(201, 169, 110, 0.1);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), #d4af7a);
+            color: #000;
+            border-color: var(--primary-color);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .notification-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notification-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .notification-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(201, 169, 110, 0.1);
+        }
+
+        .notification-item.unread {
+            background: rgba(201, 169, 110, 0.05);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .notification-item.unread::before {
+            display: none;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .notification-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .notification-title-text {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .notification-type {
+            display: inline-block;
+            background: rgba(201, 169, 110, 0.2);
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .notification-content {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            margin-left: 40px;
+        }
+
+        .notification-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-left: 40px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .notification-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .notification-actions-inline {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-title {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-text {
+            color: var(--text-muted);
+        }
+
+        .unread-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            color: #fff;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .notification-type-booking {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .notification-type-payment {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .notification-type-album {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .notification-type-review {
+            background: rgba(249, 115, 22, 0.2);
+            color: #f97316;
+        }
+
+        @@keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+    </style>
+}
+
+<div class="notification-hero">
+    <div class="container" data-aos="fade-up">
+        <h1>
+            <i class="bi bi-bell-fill me-3"></i>Trung Tâm Thông Báo
+        </h1>
+        <p class="text-muted mt-2">Qu?n lý t?t c? thông báo c?a b?n</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="notification-container" data-aos="fade-up">
+
+        <!-- Controls -->
+        <div class="notification-controls">
+            <div class="notification-filters">
+                <button class="filter-btn active" onclick="filterNotifications('all')">
+                    <i class="bi bi-funnel me-2"></i>T?t C?
+                </button>
+                <button class="filter-btn" onclick="filterNotifications('booking')">
+                    <i class="bi bi-calendar-check me-2"></i>Booking
+                </button>
+                <button class="filter-btn" onclick="filterNotifications('album')">
+                    <i class="bi bi-image me-2"></i>Album
+                </button>
+                <button class="filter-btn" onclick="filterNotifications('unread')">
+                    <i class="bi bi-exclamation-circle me-2"></i>Ch?a ??c
+                </button>
+            </div>
+
+            <div class="notification-actions">
+                <button class="action-btn" onclick="markAllAsRead()">
+                    <i class="bi bi-check-all me-2"></i>?ánh D?u ?ã ??c
+                </button>
+                <button class="action-btn" onclick="clearAll()">
+                    <i class="bi bi-trash me-2"></i>Xóa T?t C?
+                </button>
+            </div>
+        </div>
+
+        <!-- Notifications List -->
+        <div class="notification-list">
+            <!-- Notification Item 1 -->
+            <div class="notification-item unread" onclick="markAsRead(1)">
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <div class="notification-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div>
+                            <div class="notification-title-text">??t L?ch Thành Công</div>
+                            <span class="notification-type notification-type-booking">Booking</span>
+                        </div>
+                    </div>
+                    <div class="unread-badge"></div>
+                </div>
+                <div class="notification-content">
+                    L?ch ch?p ngày 15/04/2025 lúc 14:00 ?ã ???c xác nh?n. Gói: Phóng S? C??i Premium
+                </div>
+                <div class="notification-footer">
+                    <div class="notification-time">
+                        <i class="bi bi-clock"></i>
+                        <span>2 gi? tr??c</span>
+                    </div>
+                    <div class="notification-actions-inline">
+                        <a href="/Booking/BookingDetail/123" class="action-link">Xem Chi Ti?t</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Item 2 -->
+            <div class="notification-item unread" onclick="markAsRead(2)">
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <div class="notification-icon">
+                            <i class="bi bi-images"></i>
+                        </div>
+                        <div>
+                            <div class="notification-title-text">Album Ch?p S?n Sàng</div>
+                            <span class="notification-type notification-type-album">Album</span>
+                        </div>
+                    </div>
+                    <div class="unread-badge"></div>
+                </div>
+                <div class="notification-content">
+                    Album ?nh t? ngày 10/04/2025 ?ã s?n sàng xem. Vui lòng nh?p mã OTP ?? xem ?nh
+                </div>
+                <div class="notification-footer">
+                    <div class="notification-time">
+                        <i class="bi bi-clock"></i>
+                        <span>5 gi? tr??c</span>
+                    </div>
+                    <div class="notification-actions-inline">
+                        <a href="/Booking/ViewAlbum/456" class="action-link">Xem Album</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Item 3 -->
+            <div class="notification-item" onclick="markAsRead(3)">
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <div class="notification-icon">
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <div>
+                            <div class="notification-title-text">Yêu C?u ?ánh Giá</div>
+                            <span class="notification-type notification-type-review">Review</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="notification-content">
+                    Hãy chia s? ?ánh giá c?a b?n v? d?ch v? ch?p hình ?? giúp chúng tôi c?i thi?n
+                </div>
+                <div class="notification-footer">
+                    <div class="notification-time">
+                        <i class="bi bi-clock"></i>
+                        <span>1 ngày tr??c</span>
+                    </div>
+                    <div class="notification-actions-inline">
+                        <a href="/Booking/WriteReview/123" class="action-link">?ánh Giá Ngay</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Item 4 -->
+            <div class="notification-item" onclick="markAsRead(4)">
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <div class="notification-icon">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </div>
+                        <div>
+                            <div class="notification-title-text">Mã Gi?m Giá M?i</div>
+                            <span class="notification-type" style="background: rgba(250, 204, 21, 0.2); color: #facc15;">Promo</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="notification-content">
+                    B?n có mã gi?m giá 20% cho booking ti?p theo. Mã: SPRING20. H?n: 30/04/2025
+                </div>
+                <div class="notification-footer">
+                    <div class="notification-time">
+                        <i class="bi bi-clock"></i>
+                        <span>2 ngày tr??c</span>
+                    </div>
+                    <div class="notification-actions-inline">
+                        <a href="/Booking/Coupons" class="action-link">Xem Mã</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Item 5 -->
+            <div class="notification-item" onclick="markAsRead(5)">
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <div class="notification-icon">
+                            <i class="bi bi-gift"></i>
+                        </div>
+                        <div>
+                            <div class="notification-title-text">?i?m Thân Thi?t</div>
+                            <span class="notification-type" style="background: rgba(168, 85, 247, 0.2); color: #a855f7;">Loyalty</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="notification-content">
+                    B?n v?a nh?n ???c 150 ?i?m t? booking g?n ?ây. T?ng: 450 ?i?m
+                </div>
+                <div class="notification-footer">
+                    <div class="notification-time">
+                        <i class="bi bi-clock"></i>
+                        <span>3 ngày tr??c</span>
+                    </div>
+                    <div class="notification-actions-inline">
+                        <a href="/Client/Loyalty" class="action-link">Xem Chi Ti?t</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State (shown when no notifications) -->
+        <!-- <div class="empty-state" style="display: none;">
+            <div class="empty-state-icon">
+                <i class="bi bi-inbox"></i>
+            </div>
+            <div class="empty-state-title">Không Có Thông Báo</div>
+            <div class="empty-state-text">B?n s? nh?n ???c thông báo khi có c?p nh?t m?i</div>
+        </div> -->
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterNotifications(type) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.filter-btn').classList.add('active');
+
+            // Filter logic would go here
+            console.log('Filter by:', type);
+        }
+
+        function markAsRead(id) {
+            const item = event.currentTarget;
+            item.classList.remove('unread');
+            const badge = item.querySelector('.unread-badge');
+            if (badge) badge.style.display = 'none';
+
+            // API call would go here
+            console.log('Marked as read:', id);
+        }
+
+        function markAllAsRead() {
+            document.querySelectorAll('.notification-item.unread').forEach(item => {
+                item.classList.remove('unread');
+                const badge = item.querySelector('.unread-badge');
+                if (badge) badge.style.display = 'none';
+            });
+
+            // API call would go here
+            console.log('Marked all as read');
+        }
+
+        function clearAll() {
+            if (confirm('B?n có ch?c mu?n xóa t?t c? thông báo?')) {
+                document.querySelectorAll('.notification-item').forEach(item => {
+                    item.style.animation = 'fadeOut 0.3s ease forwards';
+                    setTimeout(() => item.remove(), 300);
+                });
+
+                // API call would go here
+                console.log('Cleared all notifications');
+            }
+        }
+    </script>
+}

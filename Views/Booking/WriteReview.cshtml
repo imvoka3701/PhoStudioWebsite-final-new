@@ -1,0 +1,141 @@
+﻿@model PhoStudioMVC.Models.Entities.Booking
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Đánh Giá Dịch Vụ";
+}
+
+@section Styles {
+<style>
+    .review-header { padding: 100px 0 48px; background: linear-gradient(160deg, #1a1208 0%, #2d1f0a 60%, #1a1208 100%); border-bottom: 1px solid rgba(203,163,92,0.2); text-align: center; }
+    .review-card { background: #fff; border: 1px solid #EDE8DF; border-radius: 16px; padding: 36px; max-width: 680px; margin: 0 auto; box-shadow: 0 4px 24px rgba(43,43,43,0.09); }
+    .booking-info-block { background: #FAF7F2; border-left: 4px solid #CBA35C; padding: 18px 20px; border-radius: 10px; margin-bottom: 28px; }
+    .info-row { display: flex; justify-content: space-between; padding: 6px 0; }
+    .info-label { color: #6B6B6B; font-size: 0.88rem; }
+    .info-value { color: #2B2B2B; font-weight: 600; font-size: 0.9rem; }
+    .star-rating { display: flex; gap: 12px; font-size: 2.2rem; margin-bottom: 10px; }
+    .star { cursor: pointer; color: #EDE8DF; transition: all 0.2s ease; }
+    .star:hover, .star.active { color: #CBA35C; transform: scale(1.15); }
+    .rating-text { color: #6B6B6B; font-size: 0.88rem; }
+    .form-control-review { background: #FAF7F2; border: 1.5px solid #EDE8DF; border-radius: 8px; padding: 12px 14px; color: #2B2B2B; font-size: 0.93rem; width: 100%; transition: border-color .25s ease; font-family: inherit; }
+    .form-control-review:focus { outline: none; border-color: #CBA35C; background: #fff; box-shadow: 0 0 0 3px rgba(203,163,92,0.12); }
+    .form-control-review::placeholder { color: #9B9B9B; }
+    .btn-submit-review { background: #CBA35C; color: #fff; border: none; border-radius: 10px; padding: 13px 28px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; flex: 1; }
+    .btn-submit-review:hover { background: #B8941F; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(203,163,92,0.35); }
+    .btn-cancel-review { flex: 1; background: transparent; color: #CBA35C; border: 1.5px solid #CBA35C; border-radius: 10px; padding: 13px 28px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.25s ease; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+    .btn-cancel-review:hover { background: rgba(203,163,92,0.08); color: #B8941F; }
+    .rating-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .rating-bar-track { flex: 1; height: 7px; background: #F5EFE6; border-radius: 4px; overflow: hidden; }
+    .rating-bar-fill { height: 100%; background: linear-gradient(90deg, #CBA35C, #d4af7a); border-radius: 4px; }
+</style>
+}
+
+<header class="review-header">
+    <div class="container" data-aos="fade-up">
+        <h1 class="text-white" style="font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;margin-bottom:10px;">Chia Sẻ Đánh Giá Của Bạn</h1>
+        <p class="text-muted" style="font-weight:300;">Giúp chúng tôi cải thiện dịch vụ</p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:48px 0;min-height:60vh;">
+    <div class="container">
+        <div class="review-card" data-aos="fade-up">
+
+            <div class="booking-info-block">
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-calendar me-2"></i>Ngày Chụp</span>
+                    <span class="info-value">@Model.BookingDate.ToString("dd/MM/yyyy")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-clock me-2"></i>Khung Giờ</span>
+                    <span class="info-value">@Model.StartTime.ToString(@"hh\:mm")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-box me-2"></i>Gói Dịch Vụ</span>
+                    <span class="info-value">@Model.ServicePackage?.Name</span>
+                </div>
+            </div>
+
+            <form asp-action="SubmitReview" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="bookingId" value="@Model.Id" />
+
+                <div class="mb-4">
+                    <label style="color:#2B2B2B;font-weight:700;font-size:1rem;display:block;margin-bottom:12px;">
+                        <i class="bi bi-star-fill me-2" style="color:#CBA35C;"></i>Đánh Giá Của Bạn
+                    </label>
+                    <div class="star-rating" id="starRating">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="bi bi-star-fill star" data-rating="@i" onclick="setRating(@i)"></i>
+                        }
+                    </div>
+                    <input type="hidden" id="ratingValue" name="rating" value="0" required>
+                    <div class="rating-text"><span id="ratingText">Vui lòng chọn đánh giá</span></div>
+                </div>
+
+                <div class="mb-4">
+                    <label style="color:#2B2B2B;font-weight:600;font-size:0.93rem;display:block;margin-bottom:8px;">
+                        <i class="bi bi-chat-dots me-2" style="color:#CBA35C;"></i>Nhận Xét Chi Tiết
+                    </label>
+                    <textarea class="form-control-review" name="comment" rows="5"
+                              placeholder="Chia sẻ trải nghiệm của bạn về dịch vụ chụp hình..."
+                              maxlength="1000"></textarea>
+                    <small style="color:#9B9B9B;font-size:0.8rem;">Tối đa 1000 ký tự</small>
+                </div>
+
+                <div class="mb-4">
+                    <label style="color:#2B2B2B;font-weight:600;font-size:0.93rem;display:block;margin-bottom:8px;">
+                        <i class="bi bi-camera me-2" style="color:#CBA35C;"></i>Thợ Chụp
+                    </label>
+                    <input type="text" class="form-control-review" name="photographer" placeholder="Tên thợ chụp (không bắt buộc)">
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:28px;">
+                    <button type="submit" class="btn-submit-review">
+                        <i class="bi bi-check-circle me-2"></i>Gửi Đánh Giá
+                    </button>
+                    <a href="/Booking/MyBookings" class="btn-cancel-review">
+                        <i class="bi bi-x-circle me-2"></i>Hủy
+                    </a>
+                </div>
+            </form>
+
+            <div style="margin-top:36px;padding-top:28px;border-top:1px solid #EDE8DF;">
+                <h5 style="font-family:'Playfair Display',serif;color:#2B2B2B;margin-bottom:20px;">
+                    <i class="bi bi-graph-up me-2" style="color:#CBA35C;"></i>Đánh Giá Từ Khách Hàng
+                </h5>
+                @{
+                    var ratingData = new[] {
+                        (star: 5, count: 128, percent: 85),
+                        (star: 4, count: 42,  percent: 28),
+                        (star: 3, count: 18,  percent: 12),
+                        (star: 2, count: 5,   percent: 3),
+                        (star: 1, count: 2,   percent: 1)
+                    };
+                }
+                @foreach (var item in ratingData)
+                {
+                    <div class="rating-bar">
+                        <div style="width:36px;text-align:right;color:#CBA35C;font-weight:700;font-size:0.88rem;">@item.star ★</div>
+                        <div class="rating-bar-track">
+                            <div class="rating-bar-fill" style="width:@item.percent%;"></div>
+                        </div>
+                        <div style="width:40px;text-align:right;color:#6B6B6B;font-size:0.85rem;">@item.count</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    const ratingTexts = ['Vui lòng chọn đánh giá','Rất tệ','Tệ','Trung bình','Tốt','Tuyệt vời'];
+    function setRating(rating) {
+        document.getElementById('ratingValue').value = rating;
+        document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < rating));
+        document.getElementById('ratingText').textContent = ratingTexts[rating];
+    }
+    document.addEventListener('keydown', e => { if (e.key >= '1' && e.key <= '5') setRating(parseInt(e.key)); });
+</script>
+}

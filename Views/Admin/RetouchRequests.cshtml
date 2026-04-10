@@ -1,0 +1,101 @@
+﻿@model List<PhoStudioMVC.Models.Entities.RetouchRequest>
+@using PhoStudioMVC.Models.Enums
+@{
+    ViewData["Title"] = "Quản lý yêu cầu retouch";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-page-header">
+    <h1>🎨 Quản lý yêu cầu Retouch</h1>
+    <p>Theo dõi và xử lý các yêu cầu chỉnh sửa ảnh từ khách hàng.</p>
+</div>
+
+<div class="dash-card mb-4">
+    <div class="d-flex flex-wrap gap-2 mb-0">
+        @foreach (var status in Enum.GetValues<RetouchStatus>())
+        {
+            <a asp-action="RetouchRequests" asp-route-filterStatus="@((int)status)"
+               class="btn btn-sm @(ViewBag.FilterStatus == status ? "btn-premium" : "btn-outline-accent")">
+                @status
+            </a>
+        }
+        <a asp-action="RetouchRequests" class="btn btn-sm btn-outline-accent">Tất cả</a>
+    </div>
+</div>
+
+<div class="dash-card">
+    <div class="table-responsive">
+        <table class="table table-premium align-middle">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Mã lịch</th>
+                    <th>Khách</th>
+                    <th>Thợ ảnh</th>
+                    <th>Gói</th>
+                    <th>Lần</th>
+                    <th>Yêu cầu</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="9" class="text-center py-5" style="color:var(--text-muted);">Không có yêu cầu retouch nào.</td></tr>
+                }
+                else
+                {
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td style="color:var(--text-muted);font-size:0.85rem;">@r.Id</td>
+                            <td><strong>#@(r.Booking?.Id?.PadLeft(6, '0') ?? "—")</strong></td>
+                            <td>@(r.Booking?.Client?.FullName ?? "—")</td>
+                            <td>@(r.Booking?.Photographer?.FullName ?? "Chưa phân công")</td>
+                            <td>@(r.Booking?.ServicePackage?.Name ?? "—")</td>
+                            <td><span class="badge bg-info">Lần @r.RequestNumber</span></td>
+                            <td><small style="color:var(--text-body);">@r.Note</small></td>
+                            <td>
+                                @{
+                                    var (badgeBg, badgeText) = r.Status switch
+                                    {
+                                        RetouchStatus.Pending    => ("var(--warning-bg)", "var(--warning)"),
+                                        RetouchStatus.InProgress => ("var(--info-bg)",    "var(--info)"),
+                                        RetouchStatus.Completed  => ("var(--success-bg)", "var(--success)"),
+                                        _                        => ("rgba(0,0,0,0.05)",  "var(--text-muted)")
+                                    };
+                                }
+                                <span class="badge" style="background:@badgeBg;color:@badgeText;">@r.Status</span>
+                            </td>
+                            <td class="text-end">
+                                @if (r.Status == RetouchStatus.Pending)
+                                {
+                                    <form method="post" asp-action="UpdateRetouchStatus" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="retouchId" value="@r.Id" />
+                                        <input type="hidden" name="newStatus" value="@((int)RetouchStatus.InProgress)" />
+                                        <button type="submit" class="btn btn-sm btn-premium">▶ Bắt đầu</button>
+                                    </form>
+                                }
+                                else if (r.Status == RetouchStatus.InProgress)
+                                {
+                                    <form method="post" asp-action="UpdateRetouchStatus" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="retouchId" value="@r.Id" />
+                                        <input type="hidden" name="newStatus" value="@((int)RetouchStatus.Completed)" />
+                                        <button type="submit" class="btn btn-sm" style="background:var(--success);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-weight:600;">✓ Hoàn thành</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text-muted);">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

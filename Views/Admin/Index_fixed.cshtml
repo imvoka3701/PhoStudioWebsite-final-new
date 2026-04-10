@@ -1,0 +1,422 @@
+﻿@model PhoStudioMVC.Models.ViewModels.AdminRevenueViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản trị viên";
+}
+
+    <header class="mb-5 d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h1 class="display-5 text-white mb-2">Tổng Quan</h1>
+            <p class="text-muted" style="font-weight: 300; font-size: 1.15rem;">Chào mừng trở lại, đây là những cập nhật lịch hẹn hôm nay.</p>
+        </div>
+        <div class="d-flex gap-2 mt-3 mt-md-0">
+            <button class="btn btn-premium" onclick="exportReport('excel')"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Xuất Excel</button>
+        </div>
+    </header>
+
+    <!-- Top Cards -->
+    <div class="row g-4 mb-4" id="stats-container">
+        <div class="col-md-3">
+            <div class="dash-card border-accent border-top border-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 small text-uppercase">Tổng Số Lịch (Hoàn Tất)</p>
+                        <h3 class="text-white mb-0" id="stat-total-bookings" data-target="@Model.TotalBookings">0</h3>
+                    </div>
+                    <div class="text-accent fs-3"><i class="bi bi-calendar-event"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dash-card border-top border-3 border-success">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 small text-uppercase">Tổng Doanh Thu</p>
+                        <h3 class="text-white mb-0 d-flex align-items-center" id="stat-total-revenue" data-target="@Model.TotalRevenue">
+                            <span class="revenue-counter">0đ</span>
+                            @if (Model.GrowthRate >= 0) {
+                                <span class="badge bg-success bg-opacity-10 text-success ms-2 fs-6 fw-normal"><i class="bi bi-graph-up-arrow me-1"></i>+@Model.GrowthRate.ToString("0.0")%</span>
+                            } else {
+                                <span class="badge bg-danger bg-opacity-10 text-danger ms-2 fs-6 fw-normal"><i class="bi bi-graph-down-arrow me-1"></i>@Model.GrowthRate.ToString("0.0")%</span>
+                            }
+                        </h3>
+                    </div>
+                    <div class="text-success fs-3"><i class="bi bi-wallet2"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dash-card border-top border-3 border-info">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 small text-uppercase">Chuyển Khoản Online</p>
+                        <h3 class="text-white mb-0" id="stat-online-revenue" data-target="@Model.OnlineRevenue"><span class="revenue-counter">0đ</span></h3>
+                    </div>
+                    <div class="text-info fs-3"><i class="bi bi-bank"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dash-card border-top border-3 border-warning">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 small text-uppercase">Tiền Mặt</p>
+                        <h3 class="text-white mb-0" id="stat-cash-revenue" data-target="@Model.CashRevenue"><span class="revenue-counter">0đ</span></h3>
+                    </div>
+                    <div class="text-warning fs-3"><i class="bi bi-cash-stack"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="dash-card mb-5">
+        <h4 class="text-white mb-4">Biểu Đồ Doanh Thu</h4>
+        <canvas id="revenueChart" style="max-height: 300px;"></canvas>
+    </div>
+
+    <!-- UC05 - STAFF MANAGEMENT -->
+    <div class="dash-card mb-5 border-info border-start border-3">
+        <h4 class="text-white mb-4"><i class="bi bi-people-fill me-2 text-info"></i> Quản Lý Nhân Sự (Thợ Chụp)</h4>
+        <form id="admin-create-staff-form" class="row border p-4 border-secondary rounded glass-panel mb-4">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label text-muted small">Tên Đăng Nhập *</label>
+                <input type="text" id="staff-username" class="form-control bg-transparent text-white border-secondary" placeholder="Tên đăng nhập thợ chụp" required>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label text-muted small">Mật Khẩu *</label>
+                <input type="text" id="staff-pass" class="form-control bg-transparent text-white border-secondary" placeholder="Mật khẩu khởi tạo" required>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-info w-100">Cấp Tài Khoản Thợ Chụp</button>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-premium text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th class="text-end">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-staff-tbody">
+                    @foreach (var staff in Model.StaffMembers)
+                    {
+                        <tr>
+                            <td>@staff.Username</td>
+                            <td><span class="badge bg-info">Thợ Chụp</span></td>
+                            <td class="text-end">
+                                <span class="badge bg-secondary">Active</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- UC05 - CLIENT MANAGEMENT -->
+    <div class="dash-card mb-5 border-secondary border-start border-3">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-white mb-0"><i class="bi bi-person-lines-fill me-2 text-secondary"></i> Quản Lý Khách Hàng (Users)</h4>
+            <button class="btn btn-sm btn-outline-secondary" onclick="(function(){location.reload();})()" title="Tải lại dữ liệu mới nhất">
+                <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-premium text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Khách Hàng &amp; Email</th>
+                        <th>Tên Đăng Nhập</th>
+                        <th>SĐT</th>
+                        <th>Ngày Đăng Ký</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-end">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-clients-tbody">
+                    @if (Model.RecentClients != null) {
+                        foreach (var client in Model.RecentClients) {
+                            <tr>
+                                <td>@client.FullName</td>
+                                <td>@client.Username</td>
+                                <td>@client.Phone</td>
+                                <td>@client.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                <td><span class="badge bg-success">Hoạt Động</span></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- UC02/UC04 - SERVICE MANAGEMENT -->
+    <div class="dash-card mb-5 border-success border-start border-3">
+        <h4 class="text-white mb-4"><i class="bi bi-tags-fill me-2 text-success"></i> Quản Lý Dịch Vụ</h4>
+        <form id="admin-create-service-form" class="row border p-4 border-secondary rounded glass-panel mb-4">
+            <div class="col-md-3 mb-3 mb-md-0">
+                <label class="form-label text-muted small">Tên Gói Cước *</label>
+                <input type="text" id="service-name" class="form-control bg-transparent text-white border-secondary" placeholder="Tên gói" required>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <label class="form-label text-muted small">Giá Tiền (VND) *</label>
+                <input type="number" id="service-price" class="form-control bg-transparent text-white border-secondary" placeholder="vd: 5000000" required>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label text-muted small">Mô Tả</label>
+                <input type="text" id="service-desc" class="form-control bg-transparent text-white border-secondary" placeholder="Mô tả ngắn">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-success w-100">Thêm Gói</button>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-premium text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Mã Gói</th>
+                        <th>Tên Gói</th>
+                        <th>Giá (VND)</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-end">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-services-tbody">
+                    @foreach(PhoStudioMVC.Models.Entities.ServicePackage svc in Model.ServicePackages) {
+                        <tr class="@(svc.IsActive ? "" : "table-secondary text-muted")">
+                            <td>#@svc.Id</td>
+                            <td>@svc.Name</td>
+                            <td>@svc.Price.ToString("N0")đ</td>
+                            <td>
+                                @if(svc.IsActive) { <span class="badge bg-success">Hoạt Động</span> }
+                                else { <span class="badge bg-secondary">Đã ẩn</span> }
+                            </td>
+                            <td class="text-end">
+                                @if(svc.IsActive)
+                                {
+                                    <form asp-action="ToggleServiceStatus" method="post" class="d-inline" onsubmit="return confirm('Xóa/ẩn gói dịch vụ này?')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="serviceId" value="@svc.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Ẩn/Xóa</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="RestoreService" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@svc.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Kích hoạt lại</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Admin Cloud Albums Creation Form -->
+    <div class="dash-card mb-5 border-warning border-start border-3">
+        <h4 class="text-white mb-4"><i class="bi bi-cloud-arrow-up me-2 text-warning"></i> Cấp Phát Album Đám Mây (Bảo Mật OTP)</h4>
+        <p class="text-muted small mb-4">Hệ thống sẽ tạo Link, mã OTP bảo mật và hạn 30 ngày cho khách hàng.</p>
+        <form id="admin-create-album-form" class="row border p-4 border-secondary rounded glass-panel">
+            <div class="col-md-3 mb-3 mb-md-0">
+                <label class="form-label text-muted small">ID Lịch Hẹn (Tùy chọn)</label>
+                <input type="text" id="album-booking" class="form-control bg-transparent text-white border-secondary" placeholder="vd: bk_12345">
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <label class="form-label text-muted small">Username Khách Hàng *</label>
+                <input type="text" id="album-username" class="form-control bg-transparent text-white border-secondary" required>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label text-muted small">Tên Album *</label>
+                <input type="text" id="album-title" class="form-control bg-transparent text-white border-secondary" placeholder="Vd: Phóng Sự Cưới" required>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-warning w-100">Phát Hành</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Manage Albums Table -->
+    <div class="dash-card mb-5" id="admin-album-list-section">
+        <h4 class="text-white mb-4"><i class="bi bi-images me-2 text-accent"></i> Quản Lý Cloud Album</h4>
+        <div class="table-responsive">
+            <table class="table table-premium text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Tên Album & Date</th>
+                        <th>Tài Khoản Gắn</th>
+                        <th>Mã OTP (Bảo mật)</th>
+                        <th>Hạn Xem (30 ngày)</th>
+                        <th class="text-end">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-albums-tbody">
+                    <!-- JS Will Render Albums Here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Bookings Table -->
+    <div class="dash-card" style="min-height: 400px;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
+            <h4 class="text-white mb-0"><i class="bi bi-clock-history me-2 text-primary"></i> Giao Dịch Gần Đây</h4>
+            <div class="d-flex gap-2">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control search-input" placeholder="Tìm tên khách...">
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-premium text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Khách Hàng & Liên Hệ</th>
+                        <th>Gói Dịch Vụ</th>
+                        <th>Thời Gian Chụp</th>
+                        <th>Số Tiền</th>
+                        <th>Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Bookings.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                Không có giao dịch nào gần đây.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach(var b in Model.Bookings.Take(10))
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@b.Client?.FullName</strong><br>
+                                    <small class="text-muted">@b.Client?.Phone</small>
+                                </td>
+                                <td>@(b.ServicePackage?.Name ?? "Dịch vụ Studio")</td>
+                                <td>
+                                    @b.BookingDate.ToString("dd/MM/yyyy")<br>
+                                    <small class="text-accent">@b.StartTime.ToString(@"hh\:mm") - @b.EndTime.ToString(@"hh\:mm")</small>
+                                </td>
+                                <td>
+                                    <strong class="text-white">@b.TotalAmount.ToString("N0")đ</strong>
+                                </td>
+                                <td>
+                                    @if(b.Status == PhoStudioMVC.Models.Enums.BookingStatus.FullyPaid)
+                                    {
+                                        <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> Hoàn Tất (100%)</span>
+                                    }
+                                    else if(b.Status == PhoStudioMVC.Models.Enums.BookingStatus.Deposited)
+                                    {
+                                        <span class="badge bg-primary bg-opacity-25 text-info border border-primary px-3 py-2"><i class="bi bi-clock-history me-1"></i> Đã Cọc (30%)</span>
+                                    }
+                                    else if(b.Status == PhoStudioMVC.Models.Enums.BookingStatus.Cancelled)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2"><i class="bi bi-x-circle me-1"></i> Đã Hủy</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary px-3 py-2">@b.Status.ToString()</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-primary-dark border-secondary border">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title text-white"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Xóa Album</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-white mb-0" style="font-weight: 300;">Bạn có chắc chắn muốn xóa album này không? Hành động này sẽ khóa quyền truy cập đám mây của khách hàng vĩnh viễn.</p>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        window.RevenueData = @Html.Raw(Model.MonthlyRevenueJson);
+        
+        // Animated Counter Function
+        function animateCounter(element, target, duration = 2000, isRevenue = false) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (isRevenue) {
+                    element.textContent = Math.floor(current).toLocaleString('vi-VN') + 'đ;
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 16);
+        }
+        
+        // Initialize counters when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate total bookings counter
+            const totalBookingsEl = document.getElementById('stat-total-bookings');
+            if (totalBookingsEl) {
+                const target = parseInt(totalBookingsEl.dataset.target);
+                animateCounter(totalBookingsEl, target, 1500, false);
+            }
+            
+            // Animate revenue counters
+            const revenueCounters = document.querySelectorAll('.revenue-counter');
+            revenueCounters.forEach(counter => {
+                const targetElement = counter.closest('[data-target]');
+                if (targetElement) {
+                    const target = parseFloat(targetElement.dataset.target);
+                    animateCounter(counter, target, 2000, true);
+                }
+            });
+            
+            // Add hover effects to dash cards
+            const dashCards = document.querySelectorAll('.dash-card');
+            dashCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 8px 25px rgba(201, 169, 110, 0.15)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '';
+                });
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/assets/js/admin.js"></script>
+}

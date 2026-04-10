@@ -1,0 +1,37 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Tạo thợ chụp";
+}
+
+<div class="admin-page-header">
+    <h1>Tạo tài khoản Thợ chụp</h1>
+    <p>Thêm thợ chụp mới vào hệ thống.</p>
+</div>
+
+<div class="dash-card" style="max-width:640px;">
+    <form asp-controller="Admin" asp-action="HRCreate" method="post" class="row g-4">
+        @Html.AntiForgeryToken()
+        <div class="col-md-6">
+            <label class="form-label">Tên đăng nhập</label>
+            <input name="username" class="form-control" required placeholder="vd: photographer01" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Họ và tên</label>
+            <input name="fullName" class="form-control" required placeholder="Nguyễn Văn A" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" required placeholder="email@example.com" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Điện thoại</label>
+            <input name="phone" class="form-control" placeholder="0901234567" />
+        </div>
+        <div class="col-12 d-flex gap-3">
+            <button type="submit" class="btn btn-premium px-5">
+                <i class="bi bi-person-plus me-2"></i>Tạo tài khoản
+            </button>
+            <a asp-controller="Admin" asp-action="HR" class="btn btn-outline-accent">Hủy</a>
+        </div>
+    </form>
+</div>

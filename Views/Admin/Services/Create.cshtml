@@ -1,0 +1,39 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Thêm gói dịch vụ";
+}
+
+<div class="admin-page-header">
+    <h1>Thêm gói dịch vụ</h1>
+    <p>Tạo gói chụp ảnh mới cho studio.</p>
+</div>
+
+<div class="dash-card">
+    <form asp-controller="Admin" asp-action="ServiceCreate" method="post" class="row g-3">
+        @Html.AntiForgeryToken()
+        <div class="col-md-6">
+            <label class="form-label text-muted">Tên gói</label>
+            <input name="name" class="form-control" required />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted">Giá (VND)</label>
+            <input name="price" type="number" class="form-control" min="10000" required />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted">Thời lượng (phút)</label>
+            <input name="durationMinutes" type="number" class="form-control" min="30" max="480" required />
+        </div>
+        <div class="col-12">
+            <label class="form-label text-muted">Mô tả</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="col-12">
+            <label class="form-label text-muted">Thumbnail URL</label>
+            <input name="thumbnailUrl" class="form-control" />
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-premium">Lưu</button>
+            <a asp-controller="Admin" asp-action="Services" class="btn btn-outline-light">Quay lại</a>
+        </div>
+    </form>
+</div>

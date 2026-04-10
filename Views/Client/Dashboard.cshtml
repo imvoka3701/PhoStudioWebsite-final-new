@@ -1,0 +1,465 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.Entities.Booking>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "My Albums";
+    var vnNow = PhoStudioMVC.Helpers.AppTime.VnNow;
+    var totalBookings   = Model.Count();
+    var deliveredAlbums = Model.Count(b => b.CloudAlbum != null && b.CloudAlbum.ExpiryDate > vnNow);
+    var pendingDelivery = Model.Count(b => b.CloudAlbum == null);
+    var totalFavorites  = Model.SelectMany(b => b.AlbumAssets).Count(a => a.IsFavorite);
+}
+
+@section Styles {
+<style>
+    :root {
+        --bg-primary:    #F5EFE6;
+        --bg-card:       #FFFFFF;
+        --bg-secondary:  #FAF7F2;
+        --accent:        #CBA35C;
+        --accent-hover:  #B8941F;
+        --accent-light:  rgba(203,163,92,0.10);
+        --text-dark:     #2B2B2B;
+        --text-body:     #4A4A4A;
+        --text-muted:    #6B6B6B;
+        --border:        #EDE8DF;
+        --shadow-card:   0 2px 12px rgba(43,43,43,0.07);
+        --shadow-hover:  0 8px 24px rgba(43,43,43,0.12);
+        --success:       #22C55E;
+        --warning:       #F59E0B;
+        --info:          #3B82F6;
+        --danger:        #EF4444;
+    }
+
+    /* ── Header ── */
+    .client-page-header {
+        padding: 120px 0 56px;
+        background: linear-gradient(160deg, #1a1208 0%, #2d1f0a 60%, #1a1208 100%);
+        border-bottom: 1px solid rgba(203,163,92,0.2);
+    }
+
+    /* ── Stat cards ── */
+    .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px 20px;
+        text-align: center;
+        box-shadow: var(--shadow-card);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .stat-card .stat-num { font-family:'Inter',sans-serif; font-size:2.2rem; font-weight:700; color:var(--accent); margin:0; }
+    .stat-card .stat-label { font-size:0.78rem; text-transform:uppercase; letter-spacing:.6px; color:var(--text-muted); font-weight:600; margin-bottom:6px; }
+
+    /* ── Section title ── */
+    .section-title {
+        font-family:'Playfair Display',serif;
+        color:var(--text-dark);
+        font-size:1.2rem;
+        font-weight:600;
+        border-bottom:2px solid var(--accent);
+        padding-bottom:10px;
+        margin-bottom:20px;
+    }
+
+    /* ── Booking table ── */
+    .request-table th {
+        background:var(--bg-secondary); color:var(--accent);
+        border-color:var(--border); font-size:0.75rem;
+        text-transform:uppercase; letter-spacing:.5px; font-weight:600;
+        padding:11px 13px; border-bottom:2px solid var(--accent);
+    }
+    .request-table td {
+        background:var(--bg-card); border-color:var(--border);
+        color:var(--text-body); padding:11px 13px; font-size:0.88rem; vertical-align:middle;
+    }
+    .request-table tbody tr { transition:background .2s ease; }
+    .request-table tbody tr:hover td { background:rgba(203,163,92,0.05); color:var(--text-dark); }
+    .request-scroll { overflow-x:auto; border-radius:10px; scrollbar-width:thin; scrollbar-color:var(--border) var(--bg-secondary); }
+    .request-scroll::-webkit-scrollbar { height:5px; }
+    .request-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    .request-scroll::-webkit-scrollbar-thumb:hover { background:var(--accent); }
+    .req-primary { font-weight:600; color:var(--text-dark); }
+    .req-sub { color:var(--text-muted); font-size:0.8rem; margin-top:1px; }
+
+    /* ── Album cards ── */
+    .album-card {
+        border-radius:12px; overflow:hidden;
+        box-shadow:var(--shadow-card);
+        transition:transform .3s ease, box-shadow .3s ease;
+        height:100%;
+    }
+    .album-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-hover); }
+
+    /* STATE A — Pending */
+    .album-card.pending {
+        background:var(--bg-card);
+        border:1.5px dashed var(--border);
+    }
+    .album-card.pending .card-top {
+        background:linear-gradient(135deg,#FAF7F2,#F5EFE6);
+        padding:28px 20px 20px;
+        text-align:center;
+    }
+    .pending-icon {
+        width:56px; height:56px; border-radius:50%;
+        background:rgba(245,158,11,0.12);
+        display:flex; align-items:center; justify-content:center;
+        margin:0 auto 12px;
+    }
+
+    /* STATE B — Delivered */
+    .album-card.delivered {
+        background:var(--bg-card);
+        border:1.5px solid rgba(34,197,94,0.3);
+    }
+    .album-card.delivered .card-top {
+        background:linear-gradient(135deg,#f0fdf4,#dcfce7);
+        padding:28px 20px 20px;
+        text-align:center;
+    }
+    .delivered-icon {
+        width:56px; height:56px; border-radius:50%;
+        background:rgba(34,197,94,0.15);
+        display:flex; align-items:center; justify-content:center;
+        margin:0 auto 12px;
+    }
+
+    /* STATE C — Expired */
+    .album-card.expired {
+        background:var(--bg-card);
+        border:1.5px solid rgba(239,68,68,0.2);
+        opacity:.85;
+    }
+    .album-card.expired .card-top {
+        background:linear-gradient(135deg,#fff5f5,#fee2e2);
+        padding:28px 20px 20px;
+        text-align:center;
+    }
+
+    .card-body-inner { padding:16px 20px 20px; }
+    .card-title-album { font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:600; color:var(--text-dark); margin-bottom:4px; }
+    .card-meta { font-size:0.8rem; color:var(--text-muted); margin-bottom:12px; }
+
+    .btn-otp {
+        background:var(--accent); color:#fff; border:none;
+        border-radius:8px; padding:9px 16px; font-weight:600;
+        font-size:0.85rem; width:100%; transition:all .3s ease;
+        text-decoration:none; display:block; text-align:center; cursor:pointer;
+    }
+    .btn-otp:hover { background:var(--accent-hover); color:#fff; transform:translateY(-1px); box-shadow:0 4px 12px rgba(203,163,92,.35); }
+
+    .btn-disabled {
+        background:var(--bg-secondary); color:var(--text-muted);
+        border:1px solid var(--border); border-radius:8px;
+        padding:9px 16px; font-size:0.85rem; width:100%;
+        text-align:center; cursor:not-allowed; display:block;
+    }
+
+    /* Progress tracker */
+    .progress-track { display:flex; align-items:center; gap:0; margin-bottom:10px; }
+    .progress-step { flex:1; text-align:center; position:relative; }
+    .progress-step::before {
+        content:''; position:absolute; top:10px; left:50%; right:-50%;
+        height:2px; background:var(--border); z-index:0;
+    }
+    .progress-step:last-child::before { display:none; }
+    .step-dot {
+        width:20px; height:20px; border-radius:50%;
+        background:var(--border); border:2px solid var(--border);
+        display:inline-flex; align-items:center; justify-content:center;
+        position:relative; z-index:1; font-size:0.6rem; color:#fff;
+    }
+    .step-dot.done { background:var(--success); border-color:var(--success); }
+    .step-dot.active { background:var(--accent); border-color:var(--accent); }
+    .step-label { font-size:0.65rem; color:var(--text-muted); margin-top:4px; display:block; }
+
+    /* Search input */
+    .client-input {
+        background:var(--bg-secondary); border:1px solid var(--border);
+        color:var(--text-dark); border-radius:8px; font-size:0.85rem; padding:7px 11px;
+        transition:border-color .25s ease;
+    }
+    .client-input:focus { background:var(--bg-card); border-color:var(--accent); outline:none; box-shadow:0 0 0 3px rgba(203,163,92,.12); }
+    .client-input::placeholder { color:var(--text-muted); }
+
+    /* Empty state */
+    .empty-state {
+        background:var(--bg-secondary); border:1.5px dashed var(--border);
+        border-radius:12px; padding:48px 24px; text-align:center;
+    }
+
+    /* Filter tabs */
+    .filter-tab {
+        border:1.5px solid var(--border); background:transparent;
+        color:var(--text-muted); border-radius:8px; padding:6px 14px;
+        font-size:0.82rem; font-weight:600; cursor:pointer; transition:all .2s ease;
+    }
+    .filter-tab:hover, .filter-tab.active {
+        border-color:var(--accent); color:var(--accent); background:var(--accent-light);
+    }
+</style>
+}
+
+<!-- Page Header -->
+<header class="client-page-header">
+    <div class="container" data-aos="fade-in">
+        <h1 class="mb-2" style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:var(--accent);">
+            Xin chào, <span style="color:#FFFFFF;">@(User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? User.Identity?.Name)</span> 👋
+        </h1>
+        <p class="text-muted" style="font-weight:300;font-size:1.05rem;">Trung tâm theo dõi lịch hẹn và nhận ảnh của bạn.</p>
+    </div>
+</header>
+
+<section style="background:var(--bg-primary);padding:48px 0;min-height:60vh;">
+    <div class="container">
+
+        <!-- Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="50">
+                <div class="stat-card">
+                    <p class="stat-label">Tổng lịch hẹn</p>
+                    <p class="stat-num">@totalBookings</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-card">
+                    <p class="stat-label">Album sẵn sàng</p>
+                    <p class="stat-num" style="color:var(--success);">@deliveredAlbums</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="150">
+                <div class="stat-card">
+                    <p class="stat-label">Chờ bàn giao</p>
+                    <p class="stat-num" style="color:var(--warning);">@pendingDelivery</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-card">
+                    <p class="stat-label">Ảnh yêu thích</p>
+                    <p class="stat-num">@totalFavorites</p>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-calendar-x mb-3 d-block" style="font-size:3rem;color:var(--border);"></i>
+                <h5 style="font-family:'Playfair Display',serif;color:var(--text-dark);">Bạn chưa có lịch hẹn nào</h5>
+                <p style="color:var(--text-muted);margin-bottom:20px;">Đặt lịch chụp để bắt đầu hành trình nhiếp ảnh của bạn!</p>
+                <a href="/Booking/Packages" class="btn-otp" style="display:inline-block;width:auto;padding:10px 28px;">
+                    <i class="bi bi-camera me-2"></i>Đặt lịch ngay
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                <!-- LEFT: Booking tracking table -->
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h4 class="section-title">Lịch hẹn của tôi</h4>
+                    <div class="client-dash-card p-0" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-card);">
+                        <div class="request-scroll">
+                            <table class="table table-sm request-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày & Gói</th>
+                                        <th>Trạng thái</th>
+                                        <th>Album</th>
+                                        <th class="text-end">Chi tiết</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var b in Model.OrderByDescending(x => x.BookingDate))
+                                    {
+                                        var album = b.CloudAlbum;
+                                        var isExpired = album != null && album.ExpiryDate <= vnNow;
+                                        <tr>
+                                            <td>
+                                                <div class="req-primary">@b.BookingDate.ToString("dd/MM/yyyy")</div>
+                                                <div class="req-sub">@(b.ServicePackage?.Name ?? "N/A")</div>
+                                            </td>
+                                            <td>
+                                                @if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.TimeSlotLocked)
+                                                { <span class="badge bg-warning text-dark">Giữ chỗ</span> }
+                                                else if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.Deposited)
+                                                { <span class="badge bg-info text-dark">Đã cọc</span> }
+                                                else if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.ShootCompleted)
+                                                { <span class="badge bg-primary">Đã chụp</span> }
+                                                else if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.FullyPaid)
+                                                { <span class="badge bg-success">Hoàn thành</span> }
+                                                else
+                                                { <span class="badge bg-secondary">@b.Status</span> }
+                                            </td>
+                                            <td>
+                                                @if (album == null)
+                                                { <span class="badge" style="background:rgba(245,158,11,.12);color:var(--warning);">Chờ bàn giao</span> }
+                                                else if (isExpired)
+                                                { <span class="badge" style="background:rgba(239,68,68,.1);color:var(--danger);">Hết hạn</span> }
+                                                else if (album.IsVerifiedByClient)
+                                                { <span class="badge" style="background:rgba(59,130,246,.1);color:var(--info);">Đã mở</span> }
+                                                else
+                                                { <span class="badge" style="background:rgba(34,197,94,.1);color:var(--success);">Sẵn sàng</span> }
+                                            </td>
+                                            <td class="text-end">
+                                                <a asp-controller="Booking" asp-action="BookingDetail" asp-route-id="@b.Id"
+                                                   style="border:1px solid var(--accent);color:var(--accent);border-radius:7px;font-size:0.8rem;padding:4px 10px;text-decoration:none;transition:all .2s ease;display:inline-block;"
+                                                   onmouseover="this.style.background='var(--accent)';this.style.color='#fff';"
+                                                   onmouseout="this.style.background='transparent';this.style.color='var(--accent)';">
+                                                    <i class="bi bi-receipt"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Album delivery tracking cards -->
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h4 class="section-title mb-0" style="border:none;padding:0;">Album của tôi</h4>
+                        <div class="d-flex gap-2">
+                            <button class="filter-tab active" onclick="filterAlbums('all',this)">Tất cả</button>
+                            <button class="filter-tab" onclick="filterAlbums('ready',this)">Sẵn sàng</button>
+                            <button class="filter-tab" onclick="filterAlbums('pending',this)">Chờ bàn giao</button>
+                        </div>
+                    </div>
+                    <div style="border-bottom:1px solid var(--border);margin-bottom:20px;"></div>
+
+                    <div class="row g-3" id="albums-grid">
+                        @foreach (var b in Model.OrderByDescending(x => x.BookingDate))
+                        {
+                            var album = b.CloudAlbum;
+                            var isExpired = album != null && album.ExpiryDate <= vnNow;
+                            var daysLeft = album != null ? (int)(album.ExpiryDate - vnNow).TotalDays : 0;
+
+                            @if (album == null)
+                            {
+                                // ── STATE A: PENDING DELIVERY ──
+                                var stepDone = b.Status >= PhoStudioMVC.Models.Enums.BookingStatus.Deposited;
+                                var stepShoot = b.Status >= PhoStudioMVC.Models.Enums.BookingStatus.ShootCompleted;
+                                <div class="col-sm-6 album-item" data-state="pending">
+                                    <div class="album-card pending h-100">
+                                        <div class="card-top">
+                                            <div class="pending-icon">
+                                                <i class="bi bi-hourglass-split fs-4" style="color:var(--warning);"></i>
+                                            </div>
+                                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.8px;color:var(--warning);font-weight:700;">Đang xử lý</div>
+                                        </div>
+                                        <div class="card-body-inner">
+                                            <p class="card-title-album"><i class="bi bi-folder me-1" style="color:var(--text-muted);"></i>@(b.ServicePackage?.Name ?? "Album")</p>
+                                            <p class="card-meta">📅 @b.BookingDate.ToString("dd/MM/yyyy")</p>
+
+                                            <!-- Progress tracker -->
+                                            <div class="progress-track mb-3">
+                                                <div class="progress-step">
+                                                    <span class="step-dot done"><i class="bi bi-check"></i></span>
+                                                    <span class="step-label">Đặt cọc</span>
+                                                </div>
+                                                <div class="progress-step">
+                                                    <span class="step-dot @(stepShoot ? "done" : (stepDone ? "active" : ""))">
+                                                        @if (stepShoot) { <i class="bi bi-check"></i> } else { <text>2</text> }
+                                                    </span>
+                                                    <span class="step-label">Chụp xong</span>
+                                                </div>
+                                                <div class="progress-step">
+                                                    <span class="step-dot @(stepShoot ? "active" : "")">3</span>
+                                                    <span class="step-label">Bàn giao</span>
+                                                </div>
+                                                <div class="progress-step">
+                                                    <span class="step-dot">4</span>
+                                                    <span class="step-label">Nhận ảnh</span>
+                                                </div>
+                                            </div>
+
+                                            <span class="btn-disabled">
+                                                <i class="bi bi-clock me-1"></i>Đang chờ thợ ảnh bàn giao
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else if (isExpired)
+                            {
+                                // ── STATE C: EXPIRED ──
+                                <div class="col-sm-6 album-item" data-state="expired">
+                                    <div class="album-card expired h-100">
+                                        <div class="card-top">
+                                            <div style="width:56px;height:56px;border-radius:50%;background:rgba(239,68,68,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                                                <i class="bi bi-lock-fill fs-4" style="color:var(--danger);"></i>
+                                            </div>
+                                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.8px;color:var(--danger);font-weight:700;">Hết hạn</div>
+                                        </div>
+                                        <div class="card-body-inner">
+                                            <p class="card-title-album"><i class="bi bi-folder-x me-1" style="color:var(--danger);"></i>@(b.ServicePackage?.Name ?? "Album")</p>
+                                            <p class="card-meta">📅 @b.BookingDate.ToString("dd/MM/yyyy")</p>
+                                            <p style="font-size:0.78rem;color:var(--danger);margin-bottom:12px;">
+                                                <i class="bi bi-exclamation-circle me-1"></i>Album đã hết hạn @album.ExpiryDate.ToString("dd/MM/yyyy")
+                                            </p>
+                                            <span class="btn-disabled" style="color:var(--danger);border-color:rgba(239,68,68,.3);">
+                                                <i class="bi bi-lock me-1"></i>Liên hệ studio để gia hạn
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                // ── STATE B: DELIVERED & ACTIVE ──
+                                <div class="col-sm-6 album-item" data-state="ready">
+                                    <div class="album-card delivered h-100">
+                                        <div class="card-top">
+                                            <div class="delivered-icon">
+                                                <i class="bi bi-images fs-4" style="color:var(--success);"></i>
+                                            </div>
+                                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.8px;color:var(--success);font-weight:700;">Sẵn sàng nhận</div>
+                                        </div>
+                                        <div class="card-body-inner">
+                                            <p class="card-title-album"><i class="bi bi-folder-fill me-1" style="color:var(--accent);"></i>@(b.ServicePackage?.Name ?? "Album")</p>
+                                            <p class="card-meta">📅 @b.BookingDate.ToString("dd/MM/yyyy")</p>
+                                            <p style="font-size:0.78rem;color:@(daysLeft <= 7 ? "var(--danger)" : "var(--text-muted)");margin-bottom:12px;">
+                                                <i class="bi bi-clock me-1"></i>
+                                                @if (daysLeft <= 0) { <text>Hết hạn hôm nay</text> }
+                                                else if (daysLeft == 1) { <text>Còn 1 ngày</text> }
+                                                else { <text>Còn @daysLeft ngày</text> }
+                                            </p>
+                                            @if (album.IsVerifiedByClient)
+                                            {
+                                                <a asp-controller="Client" asp-action="AlbumContent" asp-route-bookingId="@b.Id" class="btn-otp">
+                                                    <i class="bi bi-images me-1"></i>Xem Album
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a asp-controller="Client" asp-action="ViewAlbum" asp-route-bookingId="@b.Id" class="btn-otp">
+                                                    <i class="bi bi-shield-lock me-1"></i>Nhận Ảnh (OTP)
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    function filterAlbums(state, btn) {
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.album-item').forEach(item => {
+            item.style.display = (state === 'all' || item.dataset.state === state) ? '' : 'none';
+        });
+    }
+</script>
+}

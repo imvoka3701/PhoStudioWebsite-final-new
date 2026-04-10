@@ -1,0 +1,94 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.Entities.ApplicationUser>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Thợ chụp";
+}
+
+<div class="admin-page-header">
+    <h1>Quản lý Nhân sự Thợ chụp</h1>
+    <p>Tạo và quản lý tài khoản thợ chụp ảnh.</p>
+</div>
+
+@if (TempData["NewPassword"] != null)
+{
+    <div class="alert alert-warning mb-4" style="border-radius:10px;background:rgba(245,158,11,.1);border-color:#F59E0B;color:#92400E;">
+        <i class="bi bi-key me-2"></i>Mật khẩu mới: <strong>@TempData["NewPassword"]</strong> — Lưu lại ngay, chỉ hiển thị 1 lần.
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span style="color:var(--text-muted);font-size:.9rem;">@Model.Count() thợ chụp</span>
+    <a asp-controller="Admin" asp-action="HRCreate" class="btn btn-premium">
+        <i class="bi bi-person-plus me-2"></i>Tạo thợ chụp mới
+    </a>
+</div>
+
+<div class="dash-card">
+    <div class="table-responsive">
+        <table class="table table-premium align-middle">
+            <thead>
+                <tr>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Điện thoại</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center py-5" style="color:var(--text-muted);">Chưa có thợ chụp nào.</td></tr>
+                }
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td><strong>@user.Username</strong></td>
+                        <td>@user.FullName</td>
+                        <td style="color:var(--text-muted);">@user.Email</td>
+                        <td style="color:var(--text-muted);">@user.Phone</td>
+                        <td>
+                            @if (user.IsActive)
+                            { <span class="badge" style="background:var(--success-bg);color:var(--success);">Hoạt động</span> }
+                            else
+                            { <span class="badge" style="background:rgba(0,0,0,.06);color:var(--text-muted);">Vô hiệu</span> }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2">
+                                <form asp-controller="Admin" asp-action="HRDeactivate" asp-route-id="@user.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-accent" @(user.IsActive ? "" : "disabled")>
+                                        @(user.IsActive ? "Vô hiệu hóa" : "Đã vô hiệu")
+                                    </button>
+                                </form>
+                                <form asp-controller="Admin" asp-action="HRDelete" asp-route-id="@user.Id" method="post" class="d-inline" onsubmit="return confirm('Xóa tài khoản này?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger);border-radius:8px;font-weight:600;">Xóa</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @{
+        int currentPage = ViewBag.CurrentPage ?? 1;
+        int totalPages  = ViewBag.TotalPages  ?? 1;
+    }
+    @if (totalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (int p = 1; p <= totalPages; p++)
+                {
+                    <li class="page-item @(p == currentPage ? "active" : "")">
+                        <a class="page-link" asp-controller="Admin" asp-action="HR" asp-route-page="@p">@p</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

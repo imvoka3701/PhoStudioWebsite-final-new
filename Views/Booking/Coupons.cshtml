@@ -1,0 +1,296 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.Entities.Coupon>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Mã Gi?m Giá";
+}
+
+@section Styles {
+    <style>
+        :root {
+            --primary-color: #c9a96e;
+            --dark-bg: #0f0f0f;
+            --card-bg: rgba(30, 30, 30, 0.8);
+            --border-color: rgba(201, 169, 110, 0.2);
+            --text-muted: #999;
+        }
+
+        .coupon-hero {
+            padding: 120px 0 80px;
+            background: linear-gradient(135deg, rgba(15,15,15,1) 0%, rgba(5,5,5,1) 100%);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .coupon-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary-color), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .coupon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .coupon-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .coupon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .coupon-card:hover::before {
+            left: 100%;
+        }
+
+        .coupon-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 20px 60px rgba(201, 169, 110, 0.1);
+            transform: translateY(-8px);
+        }
+
+        .coupon-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), #d4af7a);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .coupon-code {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 20px 0;
+            padding: 16px;
+            background: rgba(201, 169, 110, 0.05);
+            border-radius: 12px;
+            border: 2px dashed var(--primary-color);
+            letter-spacing: 2px;
+        }
+
+        .coupon-discount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+        }
+
+        .coupon-description {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .coupon-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-top: 1px solid var(--border-color);
+            margin: 20px 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .coupon-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .coupon-meta-item i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .coupon-validity {
+            background: rgba(201, 169, 110, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .coupon-button {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-color), #d4af7a);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+
+        .coupon-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(201, 169, 110, 0.3);
+        }
+
+        .coupon-button:active {
+            transform: scale(0.98);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .toast-custom {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+}
+
+<div class="coupon-hero">
+    <div class="container" data-aos="fade-up">
+        <h1><i class="bi bi-ticket-perforated me-3"></i>Mã Gi?m Giá ??c Quy?n</h1>
+        <p class="text-muted mt-3" style="font-size: 1.1rem; font-weight: 300;">
+            Khám phá các ?u ?ãi ??c bi?t dành cho b?n
+        </p>
+    </div>
+</div>
+
+<section class="py-5" style="background: var(--dark-bg);">
+    <div class="container">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h3 class="text-white">Ch?a có mã gi?m giá nào</h3>
+                <p class="empty-state-text">Vui lòng quay l?i sau ?? c?p nh?t các ?u ?ãi m?i nh?t.</p>
+            </div>
+        }
+        else
+        {
+            <div class="coupon-grid">
+                @foreach (var coupon in Model)
+                {
+                    <div class="coupon-card" data-aos="fade-up">
+                        <div class="coupon-badge">
+                            <i class="bi bi-lightning-fill me-2"></i>
+                            M?i
+                        </div>
+
+                        <div class="coupon-discount">
+                            @if (coupon.DiscountPercent > 0)
+                            {
+                                <span>-@coupon.DiscountPercent%</span>
+                            }
+                            else if (coupon.MaxDiscountAmount.HasValue)
+                            {
+                                <span>-@coupon.MaxDiscountAmount?.ToString("N0")?</span>
+                            }
+                        </div>
+
+                        <div class="coupon-code">
+                            @coupon.Code
+                        </div>
+
+                        <p class="coupon-description">
+                            @coupon.Description
+                        </p>
+
+                        <div class="coupon-validity">
+                            <i class="bi bi-calendar3 me-2"></i>
+                            H?n: @coupon.ValidUntil.ToString("dd/MM/yyyy")
+                        </div>
+
+                        <div class="coupon-meta">
+                            <div class="coupon-meta-item">
+                                <i class="bi bi-check-circle"></i>
+                                <span>@coupon.CurrentUsageCount/@(coupon.MaxUsageCount?.ToString() ?? "?")</span>
+                            </div>
+                            @if (coupon.MinOrderAmount.HasValue)
+                            {
+                                <div class="coupon-meta-item">
+                                    <i class="bi bi-wallet2"></i>
+                                    <span>T?i thi?u @coupon.MinOrderAmount?.ToString("N0")?</span>
+                                </div>
+                            }
+                        </div>
+
+                        <button class="coupon-button" onclick="copyCouponCode('@coupon.Code')">
+                            <i class="bi bi-clipboard me-2"></i>Sao Chép Mã
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function copyCouponCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showToast(`? ?ã sao chép mã: ${code}`, 'success');
+            }).catch(() => {
+                showToast('L?i sao chép mã', 'error');
+            });
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast-custom alert alert-${type} position-fixed bottom-0 end-0 m-4`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    </script>
+}

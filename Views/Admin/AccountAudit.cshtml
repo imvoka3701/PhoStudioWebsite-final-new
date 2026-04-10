@@ -1,0 +1,208 @@
+@model PhoStudioMVC.Models.ViewModels.AccountAuditSummary
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Kiểm toán Tài khoản";
+}
+
+<div class="admin-page-header">
+    <h1>🔍 Kiểm toán Tài khoản</h1>
+    <p>Báo cáo toàn diện về trạng thái người dùng, album và khả năng đăng nhập.</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="dash-card text-center border-top border-3" style="border-top-color:var(--accent)!important;">
+            <p class="mb-1" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Tổng người dùng</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;color:var(--text-dark);margin:0;">@Model.TotalUsers</h3>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="dash-card text-center border-success border-top border-3">
+            <p class="mb-1" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Tài khoản hợp lệ</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;color:var(--success);margin:0;">@Model.HealthyAccounts</h3>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="dash-card text-center border-danger border-top border-3">
+            <p class="mb-1" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Tài khoản bị khóa</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;color:var(--danger);margin:0;">@Model.LockedAccounts</h3>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="dash-card text-center border-warning border-top border-3">
+            <p class="mb-1" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Album chờ bàn giao</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;color:var(--warning);margin:0;">@Model.TotalPendingAlbums</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Filter & Search -->
+<div class="dash-card mb-4">
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+        <input type="text" id="audit-search" class="form-control" placeholder="Tìm theo tên, email, username..." style="max-width:280px;">
+        <select id="audit-role-filter" class="form-select" style="max-width:160px;">
+            <option value="">Tất cả vai trò</option>
+            <option value="Admin">Admin</option>
+            <option value="Photographer">Photographer</option>
+            <option value="Client">Client</option>
+            <option value="Customer">Customer</option>
+        </select>
+        <select id="audit-status-filter" class="form-select" style="max-width:180px;">
+            <option value="">Tất cả trạng thái</option>
+            <option value="healthy">Có thể đăng nhập</option>
+            <option value="locked">Bị khóa / Không hợp lệ</option>
+        </select>
+        <span id="audit-count" style="color:var(--text-muted);font-size:.88rem;"></span>
+    </div>
+</div>
+
+<!-- Audit Table -->
+<div class="dash-card">
+    <div class="table-responsive">
+        <table class="table table-premium align-middle" id="audit-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Người dùng</th>
+                    <th>Vai trò</th>
+                    <th>Ngày đăng ký</th>
+                    <th class="text-center">Lịch hẹn</th>
+                    <th class="text-center">Album bàn giao</th>
+                    <th class="text-center">Chờ bàn giao</th>
+                    <th class="text-center">Đăng nhập</th>
+                    <th class="text-center">Tài khoản</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{int idx = 0;}
+                @foreach (var u in Model.Users)
+                {
+                    idx++;
+                    var roleColor = u.Role switch
+                    {
+                        PhoStudioMVC.Models.Enums.UserRole.Admin        => "var(--danger)",
+                        PhoStudioMVC.Models.Enums.UserRole.Photographer => "var(--accent)",
+                        _                                                => "var(--info)"
+                    };
+                    <tr class="audit-row"
+                        data-name="@u.FullName.ToLower() @u.Username.ToLower() @(u.Email?.ToLower())"
+                        data-role="@u.Role"
+                        data-status="@(u.IsLoginViable ? "healthy" : "locked")">
+                        <td style="color:var(--text-muted);font-size:.82rem;">@idx</td>
+                        <td>
+                            <div style="font-weight:600;color:var(--text-dark);">@u.FullName</div>
+                            <div style="font-size:.8rem;color:var(--text-muted);">@u.Username</div>
+                            @if (!string.IsNullOrEmpty(u.Email))
+                            {
+                                <div style="font-size:.78rem;color:var(--text-muted);">@u.Email</div>
+                            }
+                            @if (!string.IsNullOrEmpty(u.Phone))
+                            {
+                                <div style="font-size:.78rem;color:var(--text-muted);">📞 @u.Phone</div>
+                            }
+                        </td>
+                        <td>
+                            <span class="badge" style="background:rgba(0,0,0,.06);color:@roleColor;font-weight:600;">
+                                @u.Role
+                            </span>
+                        </td>
+                        <td style="font-size:.85rem;color:var(--text-muted);">@u.RegistrationDate.ToString("dd/MM/yyyy")</td>
+                        <td class="text-center">
+                            @if (u.TotalBookings > 0)
+                            {
+                                <span class="badge" style="background:var(--accent-light);color:var(--accent);font-weight:700;">@u.TotalBookings</span>
+                            }
+                            else
+                            {
+                                <span style="color:var(--text-muted);font-size:.82rem;">—</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (u.DeliveredAlbums > 0)
+                            {
+                                <span class="badge" style="background:var(--info-bg);color:var(--info);font-weight:700;">@u.DeliveredAlbums</span>
+                            }
+                            else
+                            {
+                                <span style="color:var(--text-muted);font-size:.82rem;">—</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (u.PendingAlbums > 0)
+                            {
+                                <span class="badge" style="background:var(--warning-bg);color:var(--warning);font-weight:700;">@u.PendingAlbums chờ</span>
+                            }
+                            else
+                            {
+                                <span style="color:var(--text-muted);font-size:.82rem;">—</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (u.IsLoginViable)
+                            {
+                                <span class="badge" style="background:var(--success-bg);color:var(--success);">
+                                    <i class="bi bi-check-circle me-1"></i>Hợp lệ
+                                </span>
+                            }
+                            else if (!u.IsActive)
+                            {
+                                <span class="badge" style="background:var(--danger-bg);color:var(--danger);">
+                                    <i class="bi bi-lock me-1"></i>Bị khóa
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background:rgba(0,0,0,.06);color:var(--text-muted);">
+                                    <i class="bi bi-exclamation-circle me-1"></i>Mật khẩu trống
+                                </span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (u.IsActive)
+                            {
+                                <span class="badge" style="background:var(--success-bg);color:var(--success);">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background:var(--danger-bg);color:var(--danger);">Inactive</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const rows = document.querySelectorAll('.audit-row');
+    const countEl = document.getElementById('audit-count');
+
+    function applyFilters() {
+        const search = document.getElementById('audit-search').value.toLowerCase();
+        const role   = document.getElementById('audit-role-filter').value.toLowerCase();
+        const status = document.getElementById('audit-status-filter').value;
+        let visible  = 0;
+
+        rows.forEach(row => {
+            const matchSearch = !search || row.dataset.name.includes(search);
+            const matchRole   = !role   || row.dataset.role.toLowerCase() === role;
+            const matchStatus = !status || row.dataset.status === status;
+            const show = matchSearch && matchRole && matchStatus;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        countEl.textContent = `Hiển thị ${visible} / ${rows.length} người dùng`;
+    }
+
+    document.getElementById('audit-search').addEventListener('input', applyFilters);
+    document.getElementById('audit-role-filter').addEventListener('change', applyFilters);
+    document.getElementById('audit-status-filter').addEventListener('change', applyFilters);
+
+    // Init count
+    applyFilters();
+</script>
+}

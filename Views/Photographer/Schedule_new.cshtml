@@ -1,0 +1,134 @@
+﻿@{
+    Layout = "_PhotographerLayout";
+    ViewData["Title"] = "Lịch Làm Việc";
+}
+
+<header>
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h1 style="margin: 0; font-size: 2rem;">Lịch Trình Tác Nghiệp</h1>
+            <p class="text-muted mb-0" style="font-weight: 300; font-size: 1rem;">Chào mừng, đây là các số liệu cần phục vụ cho bạn.</p>
+        </div>
+    </div>
+</header>
+
+<!-- Top Stats Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6 col-lg-3">
+        <div class="dash-card" style="border-top: 3px solid #3B82F6;">
+            <p class="text-muted" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px;">Lịch Hẹn Của Tôi</p>
+            <h2 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1F1F1F;">7</h2>
+            <p class="text-muted small mb-0">Lịch hẹn sắp tới</p>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="dash-card" style="border-top: 3px solid #F59E0B;">
+            <p class="text-muted" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px;">Dự Ớt Tài Ảnh Lên</p>
+            <h2 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1F1F1F;">0</h2>
+            <p class="text-muted small mb-0">Album chưa tải lên</p>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="dash-card" style="border-top: 3px solid #3B82F6;">
+            <p class="text-muted" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px;">Tiền Công Dợi Kiếm</p>
+            <h2 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1F1F1F;">500.000đ</h2>
+            <p class="text-muted small mb-0">Công việc hoàn thành</p>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="dash-card" style="border-top: 3px solid #22C55E;">
+            <p class="text-muted" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px;">Tổng Thu Nhập Thước Tế</p>
+            <h2 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1F1F1F;">530.000đ</h2>
+            <p class="text-muted small mb-0">Tổng cộng</p>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Bookings -->
+<div class="dash-card">
+    <div style="border-bottom: 1px solid #E5E5E5; margin-bottom: 20px; padding-bottom: 16px;">
+        <h4 style="margin: 0; color: #1F1F1F; font-weight: 600; font-size: 1.25rem;">
+            <i class="bi bi-calendar-check me-2"></i>Lịch Chờp Cửa Bạn
+        </h4>
+        <p class="text-muted small mb-0">Có thể xem các số lịch dự phòng cho bạn</p>
+    </div>
+
+    <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <i class="bi bi-info-circle me-2" style="color: #3B82F6;"></i>
+        <span style="color: #3B82F6; font-size: 0.9rem;">Chúng tôi có thối "Hoàn ứ tất chờp" sau khi thợi gian lịch hẹn đã trôi qua.</span>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="table table-premium">
+            <thead>
+                <tr>
+                    <th>Mã & Lịch Chờp</th>
+                    <th>Gói Dịch Vụ</th>
+                    <th>Khách Hàng (SĐT)</th>
+                    <th>Hóa Hồng (20%)</th>
+                    <th>Trạng Thái</th>
+                    <th class="text-end">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>00:10 - 02:10</strong>
+                    </td>
+                    <td>2,500.000đ</td>
+                    <td>smoke-upload-A</td>
+                    <td>0900000003</td>
+                    <td><span style="color: #22C55E; font-weight: 600;">500.000đ</span></td>
+                    <td><span class="badge badge-success">Hoàn Thành</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>01:20 - 03:20</strong>
+                    </td>
+                    <td>850.000đ</td>
+                    <td>old-promo-test</td>
+                    <td>0900000003</td>
+                    <td><span style="color: #22C55E; font-weight: 600;">30.000đ</span></td>
+                    <td><span class="badge" style="background: rgba(255,255,255,0.3); color: #8B8B8B;">Chờ Xử Lý</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>03:33 - 05:33</strong>
+                    </td>
+                    <td>2,500.000đ</td>
+                    <td>smoke-deliver-B</td>
+                    <td>0900000003</td>
+                    <td><span style="color: #22C55E; font-weight: 600;">500.000đ</span></td>
+                    <td><span class="badge" style="background: rgba(255,255,255,0.3); color: #8B8B8B;">Chờ Xử Lý</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>00:10 - 02:10</strong>
+                    </td>
+                    <td>2,500.000đ</td>
+                    <td>auto-smoke-booking-past</td>
+                    <td>0800000003</td>
+                    <td><span style="color: #22C55E; font-weight: 600;">500.000đ</span></td>
+                    <td><span class="badge badge-warning">Chờ Xác Nhận</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>00:20 - 02:20</strong>
+                    </td>
+                    <td>850.000đ</td>
+                    <td>smoke-cash-payment</td>
+                    <td>0900000003</td>
+                    <td><span style="color: #22C55E; font-weight: 600;">30.000đ</span></td>
+                    <td><span class="badge badge-success">Hoàn Thành</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/js/photographer.js"></script>
+}

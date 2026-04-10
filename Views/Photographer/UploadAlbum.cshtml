@@ -1,0 +1,57 @@
+﻿@model PhoStudioMVC.Models.Entities.Booking
+@{
+    Layout = "_PhotographerLayout";
+    ViewData["Title"] = "Upload Album";
+}
+
+<div style="background:var(--bg-card);border-bottom:1px solid var(--border-light);padding:28px 32px;margin:-32px -32px 32px -32px;box-shadow:var(--shadow-sm);">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;color:var(--text-dark);margin:0 0 4px 0;">
+        <i class="bi bi-cloud-arrow-up me-2" style="color:var(--accent);"></i>Upload Album Cloud
+    </h1>
+    <p style="color:var(--text-muted);font-size:0.9rem;margin:0;">Trả ảnh cho khách hàng qua hệ thống Cloud.</p>
+</div>
+
+<div class="dash-card mb-4">
+    <div class="row g-3 mb-4 pb-4" style="border-bottom:1px solid var(--border-light);">
+        <div class="col-md-4">
+            <small style="color:var(--text-muted);display:block;margin-bottom:2px;">Khách hàng</small>
+            <strong style="color:var(--text-dark);">@Model.Client?.FullName</strong>
+        </div>
+        <div class="col-md-4">
+            <small style="color:var(--text-muted);display:block;margin-bottom:2px;">Dịch vụ</small>
+            <strong style="color:var(--text-dark);">@Model.ServicePackage?.Name</strong>
+        </div>
+        <div class="col-md-4">
+            <small style="color:var(--text-muted);display:block;margin-bottom:2px;">Lịch chụp</small>
+            <strong style="color:var(--text-dark);">@Model.BookingDate.ToString("dd/MM/yyyy") @Model.StartTime.ToString(@"hh\:mm")</strong>
+        </div>
+    </div>
+
+    <form asp-action="UploadAlbum" asp-route-bookingId="@Model.Id" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="p-3 rounded" style="background:var(--accent-lighter);border-left:3px solid var(--accent);">
+                    <small style="color:var(--text-body);">Bạn có thể chọn <strong>1 trong 2</strong>: nhập <strong>Album URL</strong> (Google Drive/S3/...) hoặc <strong>upload ảnh nội bộ</strong> để lưu trong hệ thống.</small>
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Album URL <span style="color:var(--text-muted);font-weight:400;">(tùy chọn)</span></label>
+                <input type="url" name="albumUrl" class="form-control" placeholder="https://..." />
+                <div class="form-text" style="color:var(--text-muted);">Nếu upload ảnh nội bộ, hệ thống sẽ tự tạo link nội bộ cho khách sau khi OTP verified.</div>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Upload ảnh nội bộ <span style="color:var(--text-muted);font-weight:400;">(tùy chọn)</span></label>
+                <input type="file" name="files" class="form-control" multiple accept="image/*" />
+            </div>
+            <div class="col-12 d-flex gap-3">
+                <button type="submit" class="btn btn-premium px-5">
+                    <i class="bi bi-cloud-upload me-2"></i>Tạo Album
+                </button>
+                <a asp-action="Schedule" class="btn btn-outline-accent">
+                    <i class="bi bi-arrow-left me-1"></i>Quay lại lịch
+                </a>
+            </div>
+        </div>
+    </form>
+</div>

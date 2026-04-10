@@ -1,0 +1,304 @@
+﻿@model PhoStudioMVC.Models.Entities.Booking
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Xác Thực OTP Album";
+}
+
+@section Styles {
+<style>
+    :root {
+        --gold:        #CBA35C;
+        --gold-dark:   #B8941F;
+        --bg:          #F5EFE6;
+        --bg-card:     #FFFFFF;
+        --border:      #EDE8DF;
+        --text-dark:   #2B2B2B;
+        --text-muted:  #6B6B6B;
+    }
+
+    .otp-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 120px 16px 60px;
+        background: linear-gradient(160deg, #F5EFE6 0%, #FAF7F2 100%);
+    }
+
+    .otp-card {
+        background: var(--bg-card);
+        border: 1px solid rgba(203,163,92,0.25);
+        border-radius: 20px;
+        padding: 48px 44px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 20px 60px rgba(43,43,43,0.10), 0 4px 16px rgba(203,163,92,0.08);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .otp-card::before {
+        content: '';
+        display: block;
+        height: 4px;
+        background: linear-gradient(90deg, #CBA35C, #d4af7a, #CBA35C);
+        border-radius: 20px 20px 0 0;
+        position: absolute;
+        top: 0; left: 0; right: 0;
+    }
+
+    .otp-icon-wrap {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: rgba(203,163,92,0.12);
+        border: 2px solid rgba(203,163,92,0.3);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 24px;
+        font-size: 2rem;
+        color: var(--gold);
+    }
+
+    .otp-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+    }
+
+    .otp-subtitle {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+
+    .otp-input {
+        background: #FAF7F2;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-dark);
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 0.5em;
+        text-align: center;
+        padding: 16px 12px;
+        width: 100%;
+        transition: border-color .25s ease, box-shadow .25s ease;
+        font-family: 'Inter', monospace;
+    }
+
+    .otp-input:focus {
+        background: #FFFFFF;
+        border-color: var(--gold);
+        box-shadow: 0 0 0 4px rgba(203,163,92,0.15);
+        outline: none;
+    }
+
+    .otp-input::placeholder {
+        color: #D4C5B0;
+        letter-spacing: 0.4em;
+    }
+
+    .btn-otp-submit {
+        background: var(--gold);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        width: 100%;
+        transition: all .3s ease;
+        margin-top: 20px;
+    }
+
+    .btn-otp-submit:hover {
+        background: var(--gold-dark);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(203,163,92,0.4);
+    }
+
+    .btn-back {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 11px 24px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        width: 100%;
+        transition: all .25s ease;
+        margin-top: 12px;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .btn-back:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+    }
+
+    .booking-info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(203,163,92,0.1);
+        border: 1px solid rgba(203,163,92,0.3);
+        color: var(--gold-dark);
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+    }
+
+    /* Success state */
+    .success-icon-wrap {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: rgba(34,197,94,0.1);
+        border: 2px solid rgba(34,197,94,0.3);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 24px;
+        font-size: 2.2rem;
+        color: #22C55E;
+    }
+
+    .otp-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 28px;
+    }
+
+    .otp-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: var(--border);
+    }
+
+    .otp-dot.filled { background: var(--gold); }
+</style>
+}
+
+<div class="otp-wrapper">
+    <div class="otp-card">
+
+        @if (TempData["OtpSuccess"] != null)
+        {
+            var verifiedUrlObj = TempData["VerifiedAlbumUrl"];
+            var verifiedUrl = verifiedUrlObj as string;
+            var isInternal = !string.IsNullOrWhiteSpace(verifiedUrl) &&
+                              verifiedUrl.StartsWith("/Client/AlbumContent", System.StringComparison.OrdinalIgnoreCase);
+
+            <div class="text-center">
+                <div class="success-icon-wrap">
+                    <i class="bi bi-cloud-check-fill"></i>
+                </div>
+                <h2 class="otp-title">Xác thực thành công!</h2>
+                <p class="otp-subtitle">Album của bạn đã được mở khóa. Chúc bạn xem ảnh vui vẻ 🎉</p>
+
+                @if (!isInternal)
+                {
+                    <a href="@verifiedUrl" target="_blank" class="btn-otp-submit d-block text-decoration-none">
+                        <i class="bi bi-images me-2"></i>Mở Album Ảnh
+                    </a>
+                }
+                else
+                {
+                    <div class="d-flex align-items-center justify-content-center gap-2 text-muted" style="font-size:0.88rem;">
+                        <div class="spinner-border spinner-border-sm" style="color:var(--gold);"></div>
+                        Đang chuyển hướng...
+                    </div>
+                    <script>
+                        (function () {
+                            const url = '@(verifiedUrl ?? "")';
+                            if (url) setTimeout(() => window.location.href = url, 800);
+                        })();
+                    </script>
+                }
+
+                <a asp-action="MyAlbums" class="btn-back mt-3">
+                    <i class="bi bi-arrow-left me-1"></i>Quay lại My Albums
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="text-center">
+                <div class="otp-icon-wrap">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h2 class="otp-title">Nhập mã OTP</h2>
+                <p class="otp-subtitle">
+                    Nhập mã 6 chữ số do thợ chụp cấp để mở khóa album ảnh của bạn.
+                </p>
+                <div class="booking-info-badge">
+                    <i class="bi bi-calendar3"></i>
+                    Buổi chụp @Model.BookingDate.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+
+            <form asp-action="VerifyOTP" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="albumId" value="@ViewBag.AlbumId" />
+
+                <div class="otp-dots" id="otpDots">
+                    <span class="otp-dot"></span>
+                    <span class="otp-dot"></span>
+                    <span class="otp-dot"></span>
+                    <span class="otp-dot"></span>
+                    <span class="otp-dot"></span>
+                    <span class="otp-dot"></span>
+                </div>
+
+                <input type="text"
+                       name="otp"
+                       id="otpInput"
+                       class="otp-input"
+                       placeholder="• • • • • •"
+                       maxlength="6"
+                       inputmode="numeric"
+                       pattern="[0-9]{6}"
+                       autocomplete="one-time-code"
+                       required>
+
+                <button type="submit" class="btn-otp-submit">
+                    <i class="bi bi-unlock-fill me-2"></i>Xác Thực & Mở Album
+                </button>
+            </form>
+
+            <a asp-action="MyAlbums" class="btn-back">
+                <i class="bi bi-arrow-left me-1"></i>Quay Lại
+            </a>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const input = document.getElementById('otpInput');
+    const dots  = document.querySelectorAll('.otp-dot');
+
+    if (input) {
+        // Only allow digits
+        input.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 6);
+            dots.forEach((d, i) => d.classList.toggle('filled', i < this.value.length));
+        });
+
+        // Auto-submit when 6 digits entered
+        input.addEventListener('input', function () {
+            if (this.value.length === 6) {
+                setTimeout(() => this.closest('form').submit(), 300);
+            }
+        });
+
+        input.focus();
+    }
+</script>
+}

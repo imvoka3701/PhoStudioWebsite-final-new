@@ -1,0 +1,224 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.Entities.Booking>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Lịch sử đặt lịch";
+    var now = PhoStudioMVC.Utils.TimeHelper.VnNow;
+}
+
+@section Styles {
+<style>
+    .mybookings-header {
+        padding: 120px 0 56px;
+        background: linear-gradient(160deg, #1a1208 0%, #2d1f0a 60%, #1a1208 100%);
+        border-bottom: 1px solid rgba(203,163,92,0.2);
+    }
+    .filter-btn {
+        border: 1.5px solid var(--accent-gold);
+        color: var(--accent-gold);
+        background: transparent;
+        border-radius: 8px;
+        padding: 7px 18px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: all 0.25s ease;
+        cursor: pointer;
+    }
+    .filter-btn:hover, .filter-btn.active {
+        background: var(--accent-gold);
+        color: #fff;
+    }
+    .booking-card {
+        background: #fff;
+        border: 1px solid #EDE8DF;
+        border-radius: 12px;
+        padding: 24px;
+        height: 100%;
+        box-shadow: 0 2px 12px rgba(43,43,43,0.07);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .booking-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(43,43,43,0.12);
+    }
+    .booking-card.past { border-left: 3px solid #EDE8DF; }
+    .booking-card.upcoming { border-left: 3px solid var(--accent-gold); }
+    .info-label { font-size: 0.78rem; color: #6B6B6B; display: block; margin-bottom: 2px; }
+    .info-value { color: #2B2B2B; font-weight: 500; font-size: 0.93rem; }
+    .btn-card-action {
+        border: 1.5px solid #EDE8DF;
+        color: #4A4A4A;
+        background: transparent;
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.25s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .btn-card-action:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .btn-card-action.gold { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .btn-card-action.gold:hover { background: var(--accent-gold); color: #fff; }
+    .btn-card-action.danger { border-color: #EF4444; color: #EF4444; }
+    .btn-card-action.danger:hover { background: #EF4444; color: #fff; }
+    .empty-state { background: #fff; border: 1px dashed #EDE8DF; border-radius: 12px; padding: 60px 24px; text-align: center; }
+</style>
+}
+
+<header class="mybookings-header">
+    <div class="container" data-aos="fade-in">
+        <h5 style="color:#E8C47A !important;font-size:.82rem;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px;text-shadow:0 1px 6px rgba(0,0,0,0.5);">LỊCH HẸN CỦA TÔI</h5>
+        <h1 style="font-family:'Playfair Display',serif !important;font-size:2.5rem !important;font-weight:700 !important;color:#FFFFFF !important;text-transform:none !important;letter-spacing:0 !important;margin-bottom:12px;text-shadow:0 3px 16px rgba(0,0,0,0.55);">Lịch sử đặt lịch</h1>
+        <p style="color:rgba(255,255,255,0.92) !important;font-weight:300;font-size:1.05rem;text-shadow:0 1px 8px rgba(0,0,0,0.4);">Theo dõi tất cả các lịch hẹn chụp ảnh của bạn.</p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:48px 0;min-height:60vh;">
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h4 style="font-family:'Playfair Display',serif;color:#2B2B2B;margin:0;">Tất cả lịch hẹn</h4>
+            <div class="d-flex gap-2">
+                <button class="filter-btn active" onclick="filterBookings('all', this)"><i class="bi bi-list-ul me-1"></i>Tất cả</button>
+                <button class="filter-btn" onclick="filterBookings('upcoming', this)"><i class="bi bi-calendar-event me-1"></i>Sắp tới</button>
+                <button class="filter-btn" onclick="filterBookings('completed', this)"><i class="bi bi-check-circle me-1"></i>Hoàn thành</button>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-calendar-x mb-3 d-block" style="font-size:3.5rem;color:#EDE8DF;"></i>
+                <h4 style="color:#2B2B2B;font-family:'Playfair Display',serif;">Bạn chưa có booking nào</h4>
+                <p style="color:#6B6B6B;margin-bottom:24px;">Hãy đặt lịch chụp đầu tiên để bắt đầu hành trình nhiếp ảnh của bạn!</p>
+                <a asp-action="Packages" style="background:#CBA35C;color:#fff;border:none;border-radius:8px;padding:12px 28px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .3s ease;" onmouseover="this.style.background='#B8941F'" onmouseout="this.style.background='#CBA35C'">
+                    <i class="bi bi-camera"></i>Đặt lịch ngay
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4" id="bookings-container">
+                @foreach (var b in Model)
+                {
+                    var isUpcoming = b.BookingDate.Date > now.Date || (b.BookingDate.Date == now.Date && b.StartTime > now.TimeOfDay);
+                    var isPast = !isUpcoming;
+                    var canCancel = b.Status == PhoStudioMVC.Models.Enums.BookingStatus.Deposited && isUpcoming;
+                    var hasAlbum = b.CloudAlbum != null;
+
+                    <div class="col-lg-6 booking-item" data-status="@(isUpcoming ? "upcoming" : "completed")" data-booking-status="@b.Status">
+                        <div class="booking-card @(isPast ? "past" : "upcoming")">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 style="font-family:'Playfair Display',serif;color:#2B2B2B;margin-bottom:2px;">#@b.Id.Substring(0, 8).ToUpper()</h5>
+                                    <p style="color:#6B6B6B;font-size:0.88rem;margin:0;">@(b.ServicePackage?.Name ?? "N/A")</p>
+                                </div>
+                                @Html.Raw(getStatusBadge(b.Status, hasAlbum))
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-calendar3" style="color:#CBA35C;"></i>
+                                        <div>
+                                            <span class="info-label">Ngày chụp</span>
+                                            <span class="info-value">@b.BookingDate.ToString("dd/MM/yyyy")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-clock" style="color:#CBA35C;"></i>
+                                        <div>
+                                            <span class="info-label">Thời gian</span>
+                                            <span class="info-value">@b.StartTime.ToString(@"hh\:mm") - @b.EndTime.ToString(@"hh\:mm")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-3 p-3 rounded" style="background:#FAF7F2;">
+                                <div>
+                                    <span class="info-label">Tổng giá</span>
+                                    <span style="color:#CBA35C;font-weight:700;">@b.TotalAmount.ToString("N0")đ</span>
+                                </div>
+                                <div>
+                                    <span class="info-label">Đã cọc</span>
+                                    <span style="color:#22C55E;font-weight:700;">@b.DepositAmount.ToString("N0")đ</span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(b.Notes))
+                            {
+                                var noteDisplay = b.Notes
+                                    .Replace("KhÃ¡ch:", "Khách:")
+                                    .Replace("KhÃ ch:", "Khách:")
+                                    .Replace("SÄT:", "SĐT:")
+                                    .Replace("SÄ\u0090T:", "SĐT:")
+                                    .Replace("Yáº§u cáº§u:", "Yêu cầu:");
+                                <p style="color:#6B6B6B;font-size:0.85rem;margin-bottom:12px;"><i class="bi bi-chat-dots me-1"></i>@noteDisplay</p>
+                            }
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a asp-action="BookingDetail" asp-route-id="@b.Id" class="btn-card-action gold flex-grow-1 justify-content-center">
+                                    <i class="bi bi-eye"></i>Chi tiết
+                                </a>
+                                @if (hasAlbum)
+                                {
+                                    <a asp-action="ViewAlbum" asp-route-bookingId="@b.Id" class="btn-card-action gold flex-grow-1 justify-content-center">
+                                        <i class="bi bi-images"></i>Xem album
+                                    </a>
+                                }
+                                @if (canCancel)
+                                {
+                                    <form asp-action="CancelBooking" method="post" class="d-inline" onsubmit="return confirmCancel('@b.Id.Substring(0, 8).ToUpper()')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@b.Id" />
+                                        <button type="submit" class="btn-card-action danger">
+                                            <i class="bi bi-x-circle"></i>Hủy
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@functions {
+    string getStatusBadge(PhoStudioMVC.Models.Enums.BookingStatus status, bool hasAlbum)
+    {
+        return status switch
+        {
+            PhoStudioMVC.Models.Enums.BookingStatus.TimeSlotLocked => "<span class=\"badge bg-warning text-dark\">Đang giữ chỗ</span>",
+            PhoStudioMVC.Models.Enums.BookingStatus.Deposited      => "<span class=\"badge bg-info text-dark\">Đã đặt cọc</span>",
+            PhoStudioMVC.Models.Enums.BookingStatus.ShootCompleted => "<span class=\"badge bg-primary\">Đã chụp xong</span>",
+            PhoStudioMVC.Models.Enums.BookingStatus.FullyPaid      => hasAlbum ? "<span class=\"badge bg-success\">Đã hoàn thành</span>" : "<span class=\"badge bg-success\">Đã thanh toán</span>",
+            PhoStudioMVC.Models.Enums.BookingStatus.Cancelled      => "<span class=\"badge bg-danger\">Đã hủy</span>",
+            _                                                       => "<span class=\"badge bg-secondary\">Không xác định</span>"
+        };
+    }
+}
+
+@section Scripts {
+<script>
+    function filterBookings(filter, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.booking-item').forEach(item => {
+            const status = item.dataset.status;
+            const bookingStatus = item.dataset.bookingStatus;
+            let show = filter === 'all'
+                || (filter === 'upcoming' && status === 'upcoming' && bookingStatus !== '3')
+                || (filter === 'completed' && (status === 'completed' || bookingStatus === '3'));
+            item.style.display = show ? 'block' : 'none';
+        });
+    }
+    function confirmCancel(id) { return confirm(`Bạn có chắc muốn hủy lịch đặt #${id}?`); }
+</script>
+}

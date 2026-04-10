@@ -1,0 +1,129 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.Entities.CloudAlbum>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Đám Mây";
+}
+
+<div class="admin-page-header">
+    <h1>Quản lý Đám mây Hình Ảnh</h1>
+    <p>Trạng thái trả ảnh, OTP và quản lý dung lượng.</p>
+</div>
+
+<div class="dash-card">
+    <div class="table-responsive">
+        <table class="table table-premium text-nowrap">
+            <thead>
+                <tr>
+                    <th>Khách & Gói dịch vụ</th>
+                    <th>Thợ chụp</th>
+                    <th>OTP (hỗ trợ khách)</th>
+                    <th>Link album</th>
+                    <th>Ngày trả / Hạn</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5" style="color:var(--text-muted);">Chưa có Album nào được tải lên.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var a in Model)
+                    {
+                        var isExpired = PhoStudioMVC.Helpers.AppTime.VnNow > a.ExpiryDate;
+                        <tr>
+                            <td>
+                                <strong style="color:var(--text-dark);">@(a.Booking?.Client?.FullName ?? "Unknown")</strong><br>
+                                <small style="color:var(--accent);">@(a.Booking?.ServicePackage?.Name ?? "Dịch Vụ")</small><br>
+                                <small style="color:var(--text-muted);">@(a.Booking?.BookingDate.ToString("dd/MM/yyyy") ?? "")</small>
+                            </td>
+                            <td>
+                                @if (a.Booking?.Photographer != null)
+                                {
+                                    <span style="color:var(--text-body);">@a.Booking.Photographer.FullName</span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text-muted);">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!isExpired)
+                                {
+                                    <span style="font-size:1.1rem;font-weight:700;color:var(--accent);letter-spacing:3px;">@a.SecureOTP</span>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text-muted);">Hết hạn</span>
+                                }
+                            </td>
+                            <td style="max-width:260px;">
+                                <div class="text-truncate" style="max-width:260px;">
+                                    <a href="@a.AlbumUrl" target="_blank" rel="noopener noreferrer" style="color:var(--info);text-decoration:none;">@a.AlbumUrl</a>
+                                </div>
+                                <form asp-controller="Admin" asp-action="UpdateAlbumUrl" method="post" class="mt-2 d-flex gap-2">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="albumId" value="@a.Id" />
+                                    <input type="url" name="albumUrl" value="@a.AlbumUrl" class="form-control form-control-sm" required />
+                                    <button type="submit" class="btn btn-sm btn-outline-accent">Lưu</button>
+                                </form>
+                            </td>
+                            <td>
+                                <div>@a.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                <small style="color:@(isExpired ? "var(--danger)" : "var(--text-muted)");">Hạn: @a.ExpiryDate.ToString("dd/MM/yyyy")</small>
+                            </td>
+                            <td>
+                                @if (isExpired)
+                                {
+                                    <span class="badge" style="background:var(--danger-bg);color:var(--danger);">Hết hạn</span>
+                                }
+                                else
+                                {
+                                    <span class="badge" style="background:var(--success-bg);color:var(--success);">Hoạt động</span>
+                                    @if (a.IsVerifiedByClient)
+                                    {
+                                        <span class="badge ms-1" style="background:var(--info-bg);color:var(--info);">Đã xác thực</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge ms-1" style="background:var(--warning-bg);color:var(--warning);">Chờ OTP</span>
+                                    }
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end flex-wrap gap-2">
+                                    <form asp-controller="Admin" asp-action="ResetAlbumOtp" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="albumId" value="@a.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-accent">Reset OTP</button>
+                                    </form>
+
+                                    <form asp-controller="Admin" asp-action="ExtendAlbumExpiry" method="post" class="d-flex gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="albumId" value="@a.Id" />
+                                        <select name="days" class="form-select form-select-sm" style="width:80px;">
+                                            <option value="7">+7d</option>
+                                            <option value="30" selected>+30d</option>
+                                            <option value="90">+90d</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm" style="background:var(--success);color:#fff;border:none;border-radius:8px;font-weight:600;">Gia hạn</button>
+                                    </form>
+
+                                    <form asp-controller="Admin" asp-action="RevokeAlbum" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="albumId" value="@a.Id" />
+                                        <button type="submit" class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger);border-radius:8px;font-weight:600;">Thu hồi</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

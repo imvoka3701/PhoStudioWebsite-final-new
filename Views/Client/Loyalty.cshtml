@@ -1,0 +1,456 @@
+﻿@model PhoStudioMVC.Models.Entities.CustomerLoyalty
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Ch??ng Trình Thân Thi?t";
+}
+
+@section Styles {
+    <style>
+        :root {
+            --primary-color: #c9a96e;
+            --dark-bg: #0f0f0f;
+            --card-bg: rgba(30, 30, 30, 0.8);
+            --border-color: rgba(201, 169, 110, 0.2);
+            --text-muted: #999;
+        }
+
+        .loyalty-hero {
+            padding: 120px 0 80px;
+            background: linear-gradient(135deg, rgba(15,15,15,1) 0%, rgba(5,5,5,1) 100%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .loyalty-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .points-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .points-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .points-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(201, 169, 110, 0.1);
+        }
+
+        .points-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 16px 0;
+        }
+
+        .points-label {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .membership-tier {
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(201, 169, 110, 0.1), rgba(212, 175, 122, 0.05));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 8px 24px;
+            background: linear-gradient(135deg, var(--primary-color), #d4af7a);
+            color: #000;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .tier-progress {
+            margin: 32px 0;
+        }
+
+        .progress-bar-custom {
+            height: 8px;
+            background: rgba(201, 169, 110, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), #d4af7a);
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tier-info {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .referral-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px;
+        }
+
+        .referral-code-box {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .referral-code-input {
+            flex: 1;
+            background: rgba(201, 169, 110, 0.05);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 14px;
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .referral-code-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(201, 169, 110, 0.3);
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, var(--primary-color), #d4af7a);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(201, 169, 110, 0.3);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .benefit-card {
+            background: rgba(201, 169, 110, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-6px);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+        }
+
+        .benefit-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .benefit-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .transaction-history {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            overflow-x: auto;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transaction-table thead {
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .transaction-table th {
+            color: var(--primary-color);
+            text-align: left;
+            padding: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .transaction-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: #fff;
+        }
+
+        .transaction-table tbody tr:hover {
+            background: rgba(201, 169, 110, 0.05);
+        }
+
+        .points-positive {
+            color: #4ade80;
+            font-weight: 700;
+        }
+
+        .points-negative {
+            color: #ff6b6b;
+            font-weight: 700;
+        }
+    </style>
+}
+
+<div class="loyalty-hero">
+    <div class="container" data-aos="fade-up">
+        <h1><i class="bi bi-star-fill me-3"></i>Ch??ng Trình Thân Thi?t VIP</h1>
+        <p class="text-muted mt-3" style="font-size: 1.1rem; font-weight: 300;">
+            Tích l?y ?i?m, nh?n ?u ?ãi ??c quy?n
+        </p>
+    </div>
+</div>
+
+<div class="container py-5">
+    @if (Model != null)
+    {
+        <!-- Points Display -->
+        <div class="points-display">
+            <div class="points-card" data-aos="fade-up">
+                <div class="points-label">
+                    <i class="bi bi-gem me-2"></i>?i?m Hi?n T?i
+                </div>
+                <div class="points-value">@Model.AvailablePoints</div>
+            </div>
+
+            <div class="points-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="points-label">
+                    <i class="bi bi-graph-up me-2"></i>T?ng ?i?m Ki?m
+                </div>
+                <div class="points-value">@Model.TotalPoints</div>
+            </div>
+
+            <div class="points-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="points-label">
+                    <i class="bi bi-shop me-2"></i>T?ng Chi Tiêu
+                </div>
+                <div class="points-value" style="font-size: 2rem;">@Model.TotalSpent.ToString("N0")</div>
+            </div>
+
+            <div class="points-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="points-label">
+                    <i class="bi bi-calendar3 me-2"></i>L?n ??t L?ch
+                </div>
+                <div class="points-value">@Model.TotalBookings</div>
+            </div>
+        </div>
+
+        <!-- Membership Tier -->
+        <div class="membership-tier" data-aos="zoom-in">
+            <div class="tier-badge">
+                @if (Model.MembershipTier == "Platinum")
+                {
+                    <i class="bi bi-gem-fill me-2"></i>
+                    <span style="color: #ffd700;">H?ng Kim C??ng</span>
+                }
+                else if (Model.MembershipTier == "Gold")
+                {
+                    <i class="bi bi-star-fill me-2"></i>
+                    <span style="color: #ffd700;">H?ng Vàng</span>
+                }
+                else if (Model.MembershipTier == "Silver")
+                {
+                    <i class="bi bi-shield-check me-2"></i>
+                    <span style="color: #c0c0c0;">H?ng B?c</span>
+                }
+                else if (Model.MembershipTier == "Bronze")
+                {
+                    <i class="bi bi-award me-2"></i>
+                    <span style="color: #cd7f32;">H?ng ??ng</span>
+                }
+                else
+                {
+                    <span>Thành Viên M?i</span>
+                }
+            </div>
+
+            <h3 class="text-white mb-3">Ti?n ?? Nâng H?ng</h3>
+
+            <div class="tier-progress">
+                @{
+                    decimal nextTierThreshold = 20_000_000;
+                    int progressPercent = (int)((Model.TotalSpent / nextTierThreshold) * 100);
+                    if (progressPercent > 100) progressPercent = 100;
+                }
+                <div class="progress-bar-custom">
+                    <div class="progress-fill" style="width: @progressPercent%"></div>
+                </div>
+                <p class="tier-info">
+                    B?n c?n chi thêm <strong>@(Math.Max(0, nextTierThreshold - Model.TotalSpent).ToString("N0"))?</strong> ?? nâng h?ng
+                </p>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-4 text-center">
+                    <small class="text-muted">Bronze</small>
+                    <p class="text-white fw-bold">5M ?+</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <small class="text-muted">Silver</small>
+                    <p class="text-white fw-bold">20M ?+</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <small class="text-muted">Gold</small>
+                    <p class="text-white fw-bold">50M ?+</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Referral Section -->
+        <div class="referral-section" data-aos="fade-up">
+            <h3 class="text-white mb-3">
+                <i class="bi bi-share me-2"></i>Mã Gi?i Thi?u c?a B?n
+            </h3>
+            <p class="text-muted mb-3">
+                Chia s? mã c?a b?n v?i b?n bè và cùng nh?n ?i?m th??ng
+            </p>
+
+            <div class="referral-code-box">
+                <input type="text" class="referral-code-input" id="referralCode" value="REF-WAITING" readonly>
+                <button class="btn-copy" onclick="copyReferralCode()">
+                    <i class="bi bi-clipboard me-2"></i>Sao Chép
+                </button>
+            </div>
+
+            <!-- Benefits -->
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="bi bi-gift"></i>
+                    </div>
+                    <h5 class="benefit-title">B?n Nh?n</h5>
+                    <p class="benefit-desc">100 ?i?m cho l?n ??u</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                    </div>
+                    <h5 class="benefit-title">B?n Bè Nh?n</h5>
+                    <p class="benefit-desc">Gi?m 5% cho l?n ??u</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="bi bi-infinity"></i>
+                    </div>
+                    <h5 class="benefit-title">Vô Gi?i H?n</h5>
+                    <p class="benefit-desc">Không có gi?i h?n l?n chia s?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="transaction-history mt-40" data-aos="fade-up">
+            <h3 class="text-white mb-4">
+                <i class="bi bi-clock-history me-2"></i>L?ch S? Giao D?ch
+            </h3>
+
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Lý Do</th>
+                        <th>?i?m</th>
+                        <th>Ngày</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <i class="bi bi-calendar-check me-2" style="color: var(--primary-color);"></i>
+                            ??t l?ch ch?p
+                        </td>
+                        <td><span class="points-positive">+150</span></td>
+                        <td>01/04/2025</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <i class="bi bi-gift me-2" style="color: var(--primary-color);"></i>
+                            B?n bè dùng mã gi?i thi?u
+                        </td>
+                        <td><span class="points-positive">+100</span></td>
+                        <td>31/03/2025</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <i class="bi bi-ticket me-2" style="color: var(--primary-color);"></i>
+                            S? d?ng ?i?m tr? giá
+                        </td>
+                        <td><span class="points-negative">-200</span></td>
+                        <td>30/03/2025</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center py-5">
+            <h4>B?n ch?a có thông tin thành viên</h4>
+            <p>Hãy t?o booking ??u tiên ?? b?t ??u ki?m ?i?m</p>
+            <a href="/Booking/Packages" class="btn btn-primary mt-3">??t L?ch Ngay</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function copyReferralCode() {
+            const code = document.getElementById('referralCode').value;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('? ?ã sao chép mã gi?i thi?u');
+            });
+        }
+    </script>
+}

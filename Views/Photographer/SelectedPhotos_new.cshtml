@@ -1,0 +1,74 @@
+﻿@{
+    Layout = "_PhotographerLayout";
+    ViewData["Title"] = "Ảnh Khách Đã Chọn";
+}
+
+<header>
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h1 style="margin: 0; font-size: 2rem;">Ảnh Khách Đã Chọn</h1>
+            <p class="text-muted mb-0" style="font-weight: 300; font-size: 1rem;">Xem danh sách ảnh khách hàng đã chọn để chỉnh sửa.</p>
+        </div>
+    </div>
+</header>
+
+<!-- Client Selected Photos -->
+<div class="dash-card">
+    <div style="border-bottom: 1px solid #E5E5E5; margin-bottom: 20px; padding-bottom: 16px;">
+        <h4 style="margin: 0; color: #1F1F1F; font-weight: 600; font-size: 1.25rem;">
+            <i class="bi bi-heart me-2"></i>Ảnh Được Chọn Bởi Khách Hàng
+        </h4>
+        <p class="text-muted small mb-0">Những bức ảnh khách hàng đã lựa chọn để chỉnh sửa</p>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="table table-premium">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên Lịch Hẹn</th>
+                    <th>Khách Hàng</th>
+                    <th>Số Ảnh Chọn</th>
+                    <th>Ngày Chọn</th>
+                    <th class="text-end">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1</strong></td>
+                    <td>Phóng Sự Cưới - Ngày 15/03</td>
+                    <td>Nguyễn Văn A & Trần Thị B</td>
+                    <td><span class="badge badge-info">45 ảnh</span></td>
+                    <td>20/03/2026</td>
+                    <td>
+                        <button class="btn btn-sm" style="background: #3B82F6; color: white; border: none; border-radius: 4px; padding: 6px 12px;">Xem Chi Tiết</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>2</strong></td>
+                    <td>Ảnh Kỷ Yếu Lớp - Ngày 10/03</td>
+                    <td>Trường THPT ABC</td>
+                    <td><span class="badge badge-info">120 ảnh</span></td>
+                    <td>18/03/2026</td>
+                    <td>
+                        <button class="btn btn-sm" style="background: #3B82F6; color: white; border: none; border-radius: 4px; padding: 6px 12px;">Xem Chi Tiết</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong></td>
+                    <td>Chup Nàng Thơ - Ngày 05/03</td>
+                    <td>Phạm Minh C</td>
+                    <td><span class="badge badge-info">32 ảnh</span></td>
+                    <td>12/03/2026</td>
+                    <td>
+                        <button class="btn btn-sm" style="background: #3B82F6; color: white; border: none; border-radius: 4px; padding: 6px 12px;">Xem Chi Tiết</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/js/photographer.js"></script>
+}

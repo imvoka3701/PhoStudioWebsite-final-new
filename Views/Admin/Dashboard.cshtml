@@ -1,0 +1,260 @@
+﻿@model PhoStudioMVC.Models.ViewModels.AdminDashboardViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Dashboard Doanh Thu";
+    var now = PhoStudioMVC.Utils.TimeHelper.VnNow;
+}
+
+<div class="admin-page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1>Xin chào, Admin 👋</h1>
+            <p>Quản lý studio của bạn một cách dễ dàng</p>
+        </div>
+        <div class="text-end">
+            <span style="font-size:0.85rem; color:var(--text-muted);">
+                <i class="bi bi-calendar3 me-1"></i>@now.ToString("dddd, dd/MM/yyyy")
+            </span>
+        </div>
+    </div>
+</div>
+
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="dash-card border-info border-top border-3">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Đặt lịch tháng này</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;color:var(--text-dark);margin:0;">@Model.TotalBookingsThisMonth</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dash-card border-warning border-top border-3">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Đang chờ (Deposited)</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;color:var(--text-dark);margin:0;">@Model.PendingBookings</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dash-card border-success border-top border-3">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Hoàn thành (FullyPaid)</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;color:var(--text-dark);margin:0;">@Model.CompletedBookings</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dash-card border-danger border-top border-3">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Đã hủy</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;color:var(--text-dark);margin:0;">@Model.CancelledBookings</h3>
+        </div>
+    </div>
+</div>
+
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="dash-card border-info border-top border-3">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Doanh thu Online (VNPay)</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:1.8rem;font-weight:700;color:var(--text-dark);margin:0;">@Model.RevenueOnline.ToString("N0")đ</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dash-card border-warning border-top border-3">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Doanh thu Tiền mặt</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:1.8rem;font-weight:700;color:var(--text-dark);margin:0;">@Model.RevenueCash.ToString("N0")đ</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dash-card border-success border-top border-3">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">Tổng doanh thu</p>
+            <h3 style="font-family:'Inter',sans-serif;font-size:1.8rem;font-weight:700;color:var(--accent);margin:0;">@Model.TotalRevenue.ToString("N0")đ</h3>
+        </div>
+    </div>
+</div>
+
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">📥 Xuất báo cáo doanh thu</h5>
+        <form method="get" asp-action="ExportRevenue" class="row g-3 align-items-end">
+            <div class="col-auto">
+                <label class="form-label">Tháng</label>
+                <select name="month" class="form-select" style="width:110px;">
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        if (m == now.Month)
+                        {
+                            <option value="@m" selected>Tháng @m</option>
+                        }
+                        else
+                        {
+                            <option value="@m">Tháng @m</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label">Năm</label>
+                <input type="number" name="year" class="form-control" style="width:100px;" value="@now.Year" min="2020" max="2099" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" name="format" value="excel" class="btn btn-success">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="dash-card">
+            <h4 class="mb-4">Doanh thu 12 tháng (Online vs Tiền mặt)</h4>
+            <canvas id="revenueChart" style="max-height:360px;"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="dash-card">
+            <h4 class="mb-4">Top 5 gói dịch vụ</h4>
+            <canvas id="serviceChart" style="max-height:360px;"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<div class="dash-card mb-4">
+    <h4 class="mb-3">Hiệu suất Thợ chụp tháng này</h4>
+    <div class="table-responsive">
+        <table class="table table-premium text-nowrap">
+            <thead>
+                <tr>
+                    <th>Thợ chụp</th>
+                    <th>Số đơn hoàn tất</th>
+                    <th>Tổng doanh thu</th>
+                    <th>Tổng hoa hồng</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.PhotographerPerformance.Any())
+                {
+                    <tr><td colspan="4" class="text-center py-4 text-muted">Chưa có dữ liệu hiệu suất.</td></tr>
+                }
+                else
+                {
+                    foreach (var row in Model.PhotographerPerformance)
+                    {
+                        <tr>
+                            <td>@row.PhotographerName</td>
+                            <td>@row.CompletedBookings</td>
+                            <td>@row.TotalRevenue.ToString("N0")đ</td>
+                            <td>@row.TotalCommission.ToString("N0")đ</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="dash-card mb-4">
+    <h4 class="mb-3">Khách hàng mới (Customer/Client)</h4>
+    <div class="table-responsive">
+        <table class="table table-premium text-nowrap">
+            <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Tên đăng nhập</th>
+                    <th>SĐT</th>
+                    <th>Ngày đăng ký</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.RecentClients == null || !Model.RecentClients.Any())
+                {
+                    <tr><td colspan="5" class="text-center py-4 text-muted">Chưa có khách hàng mới.</td></tr>
+                }
+                else
+                {
+                    foreach (var c in Model.RecentClients)
+                    {
+                        <tr>
+                            <td>@c.FullName</td>
+                            <td>@c.Username</td>
+                            <td>@c.Phone</td>
+                            <td>@c.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (c.IsActive)
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Bị khóa</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels        = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthLabels));
+        const onlineData    = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyOnlineRevenue));
+        const cashData      = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyCashRevenue));
+        const serviceLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopServices.Select(x => x.ServiceName)));
+        const serviceCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopServices.Select(x => x.BookingCount)));
+
+        const gold = '#CBA35C';
+        const goldLight = 'rgba(203,163,92,0.15)';
+
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#6B6B6B';
+
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Online (VNPay)', data: onlineData, backgroundColor: 'rgba(59,130,246,0.65)', borderRadius: 6 },
+                    { label: 'Tiền mặt',       data: cashData,   backgroundColor: 'rgba(203,163,92,0.75)', borderRadius: 6 }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    x: { grid: { color: 'rgba(0,0,0,0.04)' } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        ticks: { callback: v => new Intl.NumberFormat('vi-VN').format(v) + 'đ' }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('serviceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: serviceLabels,
+                datasets: [{
+                    data: serviceCounts,
+                    backgroundColor: ['#CBA35C','#3B82F6','#22C55E','#F59E0B','#EF4444'],
+                    borderWidth: 2,
+                    borderColor: '#FAF7F2'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'right' } },
+                cutout: '65%'
+            }
+        });
+    </script>
+}
+

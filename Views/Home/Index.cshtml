@@ -1,0 +1,1027 @@
+﻿@{ 
+    Layout = "_Layout";
+    ViewData["Title"] = "Phố Studio - Chụp Ảnh Studio Chuyên Nghiệp | Cưới, Kỷ Yếu, Gia Đình";
+    ViewData["Description"] = "Phố Studio - Chụp ảnh studio chuyên nghiệp tại TPHCM. Dịch vụ chụp ảnh cưới, kỷ yếu, gia đình với phong cách Việt Nam tinh tế. Đội ngũ chuyên nghiệp, trang thiết bị hiện đại.";
+    ViewData["Keywords"] = "chụp ảnh studio, chụp ảnh cưới, chụp ảnh kỷ yếu, chụp ảnh gia đình, studio chụp ảnh đẹp, nhiếp ảnh chuyên nghiệp tphcm, ảnh cưới đẹp, chụp ảnh chân dung";
+}
+
+@section Styles {
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --bg:        #F5EFE6;
+  --bg2:       #FAF7F2;
+  --gold:      #CBA35C;
+  --gold-dark: #B8941F;
+  --text1:     #1A1A1A;
+  --text2:     #5A5A5A;
+  --white:     #FFFFFF;
+  --r-btn:     8px;
+  --r-card:    18px;
+  --r-img:     20px;
+  --shadow-card: 0 4px 24px rgba(43,43,43,0.08);
+  --shadow-img:  0 12px 40px rgba(43,43,43,0.14);
+  --trans:     all 0.3s ease;
+}
+
+/* ── HERO ──────────────────────────────────────────────────── */
+.hero-section {
+  background: linear-gradient(to bottom, #F5EFE6, #FAF7F2);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Override global uppercase on hero h1 */
+.hero-section h1,
+.hero-section .hero-title {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  color: #CBA35C !important;
+}
+
+/* subtle decorative circle */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -120px; right: -120px;
+  width: 480px; height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(203,163,92,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* vignette for cinematic depth */
+.hero-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(245,239,230,0.35) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(203,163,92,0.12);
+  border: 1px solid rgba(203,163,92,0.35);
+  color: var(--gold-dark);
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(42px, 5.5vw, 64px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: #CBA35C;
+  margin-bottom: 24px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.hero-title span {
+  color: #CBA35C;
+  display: block;
+}
+
+.hero-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--text2);
+  max-width: 520px;
+  margin-bottom: 40px;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-hero-primary {
+  background: var(--gold);
+  color: var(--white);
+  border: none;
+  border-radius: var(--r-btn);
+  padding: 14px 32px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  transition: var(--trans);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-hero-primary:hover {
+  background: var(--gold-dark);
+  color: var(--white);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(203,163,92,0.4);
+}
+
+.btn-hero-secondary {
+  background: transparent;
+  color: var(--text1);
+  border: 1.5px solid rgba(26,26,26,0.25);
+  border-radius: var(--r-btn);
+  padding: 13px 28px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: var(--trans);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-hero-secondary:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-2px);
+}
+
+/* hero image column */
+.hero-img-wrap {
+  position: relative;
+  padding-bottom: 36px;
+}
+
+/* floating stat pill — outside slider overflow */
+.hero-stat-pill {
+  position: absolute;
+  bottom: -20px;
+  left: -24px;
+  background: var(--white);
+  border-radius: 14px;
+  padding: 16px 24px;
+  box-shadow: 0 8px 32px rgba(43,43,43,0.12);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 200px;
+  z-index: 10;
+}
+
+.hero-img-main {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  border-radius: var(--r-img);
+  box-shadow: var(--shadow-img);
+  filter: contrast(1.04) brightness(0.96) saturate(0.92);
+  display: block;
+}
+
+/* floating stat pill — sits below slider, always visible */
+.hero-stat-pill {
+  position: absolute;
+  bottom: 0;
+  left: -16px;
+  background: var(--white);
+  border-radius: 14px;
+  padding: 14px 22px;
+  box-shadow: 0 8px 32px rgba(43,43,43,0.12);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 190px;
+  z-index: 10;
+}
+
+.hero-stat-pill .stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.hero-stat-pill .stat-lbl {
+  font-size: 0.8rem;
+  color: var(--text2);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* ── TRUST STRIP ───────────────────────────────────────────── */
+.trust-strip {
+  background: var(--white);
+  border-radius: var(--r-card);
+  padding: 40px 48px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(203,163,92,0.12);
+  margin-top: 64px;
+}
+
+.trust-item { text-align: center; }
+
+.trust-icon {
+  font-size: 1.6rem;
+  color: var(--gold);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.trust-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.trust-label {
+  font-size: 0.88rem;
+  color: var(--text1);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.trust-sublabel {
+  font-size: 0.75rem;
+  color: var(--text2);
+  font-weight: 400;
+}
+
+/* ── SERVICES ──────────────────────────────────────────────── */
+.services-section {
+  padding: 112px 0;
+  background: var(--bg2);
+}
+
+.service-card {
+  background: var(--white);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(203,163,92,0.1);
+  transition: all 0.4s ease;
+  height: 100%;
+  position: relative;
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 56px rgba(43,43,43,0.13);
+}
+
+.service-badge {
+  position: absolute;
+  top: 16px; left: 16px;
+  background: var(--gold);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 50px;
+  z-index: 2;
+}
+
+.service-media { overflow: hidden; }
+
+.service-media img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  filter: contrast(1.05) brightness(1.02) saturate(0.95);
+  transition: transform 0.4s ease;
+  display: block;
+}
+
+.service-card:hover .service-media img {
+  transform: scale(1.05);
+}
+
+.service-body { padding: 28px 24px 32px; }
+
+.service-body h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 6px;
+}
+
+.service-tagline {
+  font-size: 0.82rem;
+  color: var(--gold);
+  font-weight: 500;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.service-body p {
+  font-size: 0.92rem;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+/* ── GALLERY ───────────────────────────────────────────────── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.gallery-item {
+  border-radius: var(--r-img);
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 4/3;
+}
+
+.gallery-item img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: contrast(1.05) brightness(1.02) saturate(0.95);
+  transition: transform 0.4s ease;
+  display: block;
+}
+
+.gallery-item:hover img { transform: scale(1.06); }
+
+.gallery-item .g-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(245,239,230,0);
+  transition: background 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-item:hover .g-overlay {
+  background: rgba(245,239,230,0.45);
+}
+
+.g-overlay-text {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.35s ease;
+  background: rgba(255,255,255,0.92);
+  color: var(--gold-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: 1px solid rgba(203,163,92,0.4);
+}
+
+.gallery-item:hover .g-overlay-text {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── CTA SECTION ───────────────────────────────────────────── */
+.cta-section {
+  background: linear-gradient(135deg, #CBA35C 0%, #E6C07B 60%, #CBA35C 100%);
+  padding: 112px 0;
+  text-align: center;
+}
+
+.cta-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 20px;
+}
+
+.cta-section p {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.88);
+  max-width: 560px;
+  margin: 0 auto 40px;
+  line-height: 1.75;
+}
+
+.btn-cta-white {
+  background: var(--white);
+  color: var(--gold-dark);
+  border: none;
+  border-radius: var(--r-btn);
+  padding: 14px 36px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: var(--trans);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cta-white:hover {
+  background: #FFF8EE;
+  color: var(--gold-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.btn-cta-outline {
+  background: transparent;
+  color: var(--white);
+  border: 2px solid rgba(255,255,255,0.6);
+  border-radius: var(--r-btn);
+  padding: 13px 32px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: var(--trans);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cta-outline:hover {
+  border-color: var(--white);
+  background: rgba(255,255,255,0.12);
+  color: var(--white);
+}
+
+/* ── ABOUT ─────────────────────────────────────────────────── */
+.about-section {
+  padding: 112px 0;
+  background: var(--bg);
+}
+
+.about-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 20px;
+  line-height: 1.25;
+}
+
+.about-section .lead {
+  font-size: 1.05rem;
+  color: var(--text2);
+  line-height: 1.8;
+}
+
+.about-section img {
+  border-radius: var(--r-img);
+  box-shadow: var(--shadow-img);
+  filter: contrast(1.05) brightness(1.02) saturate(0.95);
+}
+
+/* ── WHY CHOOSE ────────────────────────────────────────────── */
+.why-choose-section {
+  padding: 112px 0;
+  background: var(--bg2);
+}
+
+.feature-box {
+  background: var(--white);
+  border-radius: var(--r-card);
+  padding: 36px 28px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(203,163,92,0.1);
+  height: 100%;
+  transition: var(--trans);
+}
+
+.feature-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(43,43,43,0.11);
+}
+
+.feature-icon {
+  width: 56px; height: 56px;
+  background: rgba(203,163,92,0.12);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+
+.feature-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 12px;
+}
+
+.feature-description {
+  font-size: 0.9rem;
+  color: var(--text2);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── SECTION LABELS ────────────────────────────────────────── */
+.section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.section-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+
+.section-sub {
+  font-size: 1rem;
+  color: var(--text2);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.75;
+}
+
+/* ── HERO SLIDER ───────────────────────────────────────────── */
+.hero-slider {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  filter: brightness(0.96) contrast(1.04) saturate(0.93);
+}
+
+.hero-slide.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.hero-slider::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.04), rgba(0,0,0,0.14));
+  pointer-events: none;
+  z-index: 3;
+}
+
+.hero-progress {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: rgba(255,255,255,0.3);
+  z-index: 4;
+}
+
+.hero-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #CBA35C;
+}
+
+.hero-dots {
+  position: absolute;
+  bottom: 16px; right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 4;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.dot.active {
+  background: #CBA35C;
+  transform: scale(1.25);
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@@media (max-width: 991px) {
+  .hero-img-main { height: 380px; }
+  .hero-stat-pill { left: 0; bottom: -20px; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@@media (max-width: 767px) {
+  .hero-section { padding: 100px 0 64px; }
+  .hero-cta { flex-direction: column; align-items: flex-start; }
+  .trust-strip { padding: 32px 24px; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cta-section { padding: 80px 0; }
+}
+</style>
+}
+
+<!-- ── HERO ─────────────────────────────────────────────────── -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+
+            <!-- Left: Text (50%) -->
+            <div class="col-lg-6" data-aos="fade-right">
+                <span class="hero-badge">
+                    <i class="bi bi-camera-fill"></i>
+                    Studio Chụp Ảnh Cưới & Kỷ Yếu Hàng Đầu
+                </span>
+                <h1 class="hero-title">
+                    Khoảnh Khắc Việt Nam<br>
+                    <span>Nghệ Thuật Tinh Tế</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Chúng tôi không chỉ chụp ảnh — chúng tôi lưu giữ những khoảnh khắc quý giá nhất của cuộc đời bạn với phong cách Việt Nam tinh tế và đầy cảm xúc.
+                </p>
+                <div class="hero-cta">
+                    <a asp-controller="Booking" asp-action="Packages" class="btn-hero-primary">
+                        <i class="bi bi-calendar-check"></i>Đặt lịch ngay
+                    </a>
+                    <a asp-controller="Home" asp-action="Portfolio" class="btn-hero-secondary">
+                        <i class="bi bi-images"></i>Xem tác phẩm
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Image (50%) -->
+            <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left" data-aos-delay="100">
+                <div class="hero-img-wrap">
+                    <div class="hero-slider" id="heroSlider">
+                        <img src="/assets/img/hero/hero-home.jpg" class="hero-slide active" alt="Phố Studio - Ảnh cưới">
+                        <img src="/assets/img/hero/hero1.jpg" class="hero-slide" alt="Phố Studio - Cưới">
+                        <img src="/assets/img/hero/hero2.jpg" class="hero-slide" alt="Phố Studio - Gia đình">
+                        <img src="/assets/img/hero/hero3.jpg" class="hero-slide" alt="Phố Studio - Kỷ yếu">
+                        <div class="hero-progress"><div class="hero-progress-bar" id="heroProgressBar"></div></div>
+                        <div class="hero-dots">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                    <div class="hero-stat-pill">
+                        <div>
+                            <div class="stat-num">3,000+</div>
+                            <div class="stat-lbl">Khách hàng<br>hài lòng</div>
+                        </div>
+                        <div style="width:1px;height:40px;background:#EDE8DF;"></div>
+                        <div>
+                            <div class="stat-num">8+</div>
+                            <div class="stat-lbl">Năm kinh<br>nghiệm</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Trust strip -->
+        <div class="trust-strip" data-aos="fade-up" data-aos-delay="200">
+            <div class="row g-4">
+                <div class="col-6 col-md-3">
+                    <div class="trust-item">
+                        <i class="bi bi-people-fill trust-icon"></i>
+                        <div class="trust-number">3,000+</div>
+                        <div class="trust-label">Khách Hàng Hài Lòng</div>
+                        <div class="trust-sublabel">Khách hàng tin tưởng mỗi năm</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="trust-item">
+                        <i class="bi bi-heart-fill trust-icon"></i>
+                        <div class="trust-number">1,200+</div>
+                        <div class="trust-label">Cặp Đôi Hạnh Phúc</div>
+                        <div class="trust-sublabel">Ảnh cưới được lưu giữ</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="trust-item">
+                        <i class="bi bi-camera-fill trust-icon"></i>
+                        <div class="trust-number">8+</div>
+                        <div class="trust-label">Năm Kinh Nghiệm</div>
+                        <div class="trust-sublabel">Trong ngành nhiếp ảnh</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="trust-item">
+                        <i class="bi bi-award-fill trust-icon"></i>
+                        <div class="trust-number">98%</div>
+                        <div class="trust-label">Tỷ Lệ Hài Lòng</div>
+                        <div class="trust-sublabel">Đánh giá 5 sao từ khách</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── ABOUT ────────────────────────────────────────────────── -->
+<section class="about-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6" data-aos="fade-right">
+                <span class="section-label">Về Chúng Tôi</span>
+                <h2>Phố Studio — Nơi Nghệ Thuật Gặp Gỡ Cảm Xúc</h2>
+                <p class="lead mb-4">
+                    Với hơn 10 năm kinh nghiệm trong ngành nhiếp ảnh Việt Nam, chúng tôi tự hào mang đến những tác phẩm không chỉ đẹp về hình thức mà còn sâu sắc về cảm xúc.
+                </p>
+                <p style="color:#5A5A5A;line-height:1.8;margin-bottom:32px;">
+                    Đội ngũ photographer của Phố Studio am hiểu sâu sắc về văn hóa Việt Nam, biết cách tạo dáng tự nhiên và bắt trọn những khoảnh khắc chân thật nhất.
+                </p>
+                <a asp-controller="Home" asp-action="Portfolio" class="btn-hero-primary">
+                    <i class="bi bi-arrow-right"></i>Xem tác phẩm
+                </a>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop"
+                     alt="Phố Studio" class="img-fluid w-100">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── SERVICES ─────────────────────────────────────────────── -->
+<section class="services-section">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-label">Dịch Vụ</span>
+            <h2 class="section-heading">Chụp Ảnh Chuyên Nghiệp</h2>
+            <p class="section-sub">Các gói chụp được thiết kế riêng cho phong cách Việt Nam hiện đại</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="service-card">
+                    <span class="service-badge">Phổ biến nhất</span>
+                    <div class="service-media">
+                        <img src="/assets/img/packages/work1.jpg" alt="Chụp ảnh cưới">
+                    </div>
+                    <div class="service-body">
+                        <h3>Chụp Ảnh Cưới</h3>
+                        <p class="service-tagline">Lưu giữ khoảnh khắc cưới trọn đời</p>
+                        <p>Tone màu ấm, ánh sáng mềm và cảm xúc tự nhiên — lưu giữ ngày trọng đại theo phong cách Việt.</p>
+                        <a asp-controller="Booking" asp-action="Packages" class="btn-hero-primary w-100 justify-content-center">
+                            <i class="bi bi-calendar-check"></i>Đặt Lịch Ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="service-card">
+                    <div class="service-media">
+                        <img src="/assets/img/packages/ki-yeu.jpg" alt="Chụp ảnh kỷ yếu">
+                    </div>
+                    <div class="service-body">
+                        <h3>Chụp Ảnh Kỷ Yếu</h3>
+                        <p class="service-tagline">Ghi dấu thanh xuân không phai mờ</p>
+                        <p>Bố cục tinh tế, cảm xúc chân thật — ghi dấu thanh xuân và thành tựu học tập.</p>
+                        <a asp-controller="Booking" asp-action="Packages" class="btn-hero-primary w-100 justify-content-center">
+                            <i class="bi bi-calendar-check"></i>Đặt Lịch Ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="service-card">
+                    <div class="service-media">
+                        <img src="/assets/img/packages/gia-dinh.jpg" alt="Chụp ảnh gia đình">
+                    </div>
+                    <div class="service-body">
+                        <h3>Chụp Ảnh Gia Đình</h3>
+                        <p class="service-tagline">Yêu thương được lưu giữ mãi mãi</p>
+                        <p>Không gian ấm áp, tone da tự nhiên — lưu giữ sự gắn kết và những nụ cười thân thương.</p>
+                        <a asp-controller="Booking" asp-action="Packages" class="btn-hero-primary w-100 justify-content-center">
+                            <i class="bi bi-calendar-check"></i>Đặt Lịch Ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── WHY CHOOSE ──────────────────────────────────────────── -->
+<section class="why-choose-section">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="section-label">Tại Sao Chọn Chúng Tôi</span>
+            <h2 class="section-heading">Phố Studio Khác Biệt</h2>
+            <p class="section-sub">Am hiểu và tôn trọng văn hóa Việt Nam trong từng khung hình</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-box">
+                    <div class="feature-icon"><i class="bi bi-palette-fill"></i></div>
+                    <h4 class="feature-title">Tạo Dáng Tự Nhiên</h4>
+                    <p class="feature-description">Hướng dẫn tạo dáng nhẹ nhàng, tự nhiên, không gượng ép. Giúp bạn thể hiện đúng cá tính và cảm xúc thật.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-box">
+                    <div class="feature-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                    <h4 class="feature-title">Ánh Sáng Chuyên Nghiệp</h4>
+                    <p class="feature-description">Hệ thống ánh sáng studio hiện đại, tạo nên những bức ảnh với tone màu ấm áp, phù hợp với làn da người Việt.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-box">
+                    <div class="feature-icon"><i class="bi bi-star-fill"></i></div>
+                    <h4 class="feature-title">Phong Cách Việt Nam</h4>
+                    <p class="feature-description">Am hiểu văn hóa Việt Nam, tư vấn trang phục và concept phù hợp với tinh thần truyền thống và hiện đại.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-box">
+                    <div class="feature-icon"><i class="bi bi-lightning-fill"></i></div>
+                    <h4 class="feature-title">Giao Hàng Nhanh</h4>
+                    <p class="feature-description">Quy trình làm việc chuyên nghiệp, bàn giao ảnh nhanh chóng. Nhận ảnh sau 3–5 ngày làm việc.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA SECTION ─────────────────────────────────────────── -->
+<section class="cta-section">
+    <div class="container" data-aos="fade-up">
+        <h2>Kiến Tạo Khoảnh Khắc Việt Nam Độc Bản</h2>
+        <p>Đặt lịch hôm nay — lưu giữ khoảnh khắc đẹp nhất của bạn. Mỗi khung hình đều là một câu chuyện riêng, được nâng niu bằng ánh sáng mềm và cảm xúc thật.</p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:56px;">
+            <a asp-controller="Booking" asp-action="Packages" class="btn-cta-white">
+                <i class="bi bi-calendar-check"></i>Đặt Lịch Chụp Ảnh
+            </a>
+            <a href="tel:0901123456" class="btn-cta-outline">
+                <i class="bi bi-telephone"></i>Tư Vấn Miễn Phí
+            </a>
+        </div>
+        <div class="row g-4" style="max-width:700px;margin:0 auto;">
+            <div class="col-md-4 text-center">
+                <i class="bi bi-geo-alt-fill fs-3 mb-2 d-block" style="color:rgba(255,255,255,0.8);"></i>
+                <h5 style="color:#fff;font-size:1rem;margin-bottom:4px;">Địa Chỉ Studio</h5>
+                <p style="color:rgba(255,255,255,0.75);font-size:0.88rem;margin:0;">123 Nguyễn Huệ, Q.1, TP.HCM</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="bi bi-telephone-fill fs-3 mb-2 d-block" style="color:rgba(255,255,255,0.8);"></i>
+                <h5 style="color:#fff;font-size:1rem;margin-bottom:4px;">Hotline</h5>
+                <p style="color:rgba(255,255,255,0.75);font-size:0.88rem;margin:0;">0901 123 456</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="bi bi-envelope-fill fs-3 mb-2 d-block" style="color:rgba(255,255,255,0.8);"></i>
+                <h5 style="color:#fff;font-size:1rem;margin-bottom:4px;">Email</h5>
+                <p style="color:rgba(255,255,255,0.75);font-size:0.88rem;margin:0;">hello@phostudio.vn</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── GALLERY ──────────────────────────────────────────────── -->
+<section style="background:#FAF7F2;padding:112px 0;">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-5" data-aos="fade-in">
+            <div>
+                <span class="section-label">Tác Phẩm Nổi Bật</span>
+                <h2 class="section-heading mb-1">Hình Ảnh Mới Nhất</h2>
+                <p style="color:#5A5A5A;font-size:0.95rem;margin:0;">Những khoảnh khắc đã được lưu giữ</p>
+            </div>
+            <a asp-controller="Home" asp-action="Portfolio" class="btn-hero-secondary d-none d-md-inline-flex">
+                Xem Tất Cả <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="gallery-grid">
+            @{
+                string[] works = { "work1", "work2", "work3", "work1", "work2", "work3" };
+                string[] labels = { "Ảnh Cưới", "Kỷ Yếu", "Gia Đình", "Chân Dung", "Ngoại Cảnh", "Studio" };
+                for (int gi = 0; gi < works.Length; gi++) {
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="@(gi * 80)">
+                        <img src="/assets/img/packages/@(works[gi]).jpg" alt="@labels[gi]">
+                        <div class="g-overlay">
+                            <span class="g-overlay-text">
+                                <i class="bi bi-eye me-1"></i>Xem chi tiết
+                            </span>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ── FINAL CTA ────────────────────────────────────────────── -->
+<section style="background:#FAF7F2;padding:80px 0 112px;">
+    <div class="container text-center" data-aos="fade-up">
+        <span class="section-label">Bắt Đầu Ngay</span>
+        <h2 class="section-heading">Sẵn sàng lưu giữ khoảnh khắc của bạn?</h2>
+        <p class="section-sub mb-3">Đặt lịch chụp tại studio cao cấp của chúng tôi ngay hôm nay và để chúng tôi kể câu chuyện của bạn qua ống kính.</p>
+        <p style="color:#CBA35C;font-size:0.88rem;font-weight:600;margin-bottom:32px;">
+            <i class="bi bi-clock me-1"></i>Lịch chụp cuối tuần thường kín sớm — đặt trước để giữ chỗ
+        </p>
+        <a asp-controller="Booking" asp-action="Packages" class="btn-hero-primary" style="font-size:1.05rem;padding:18px 56px;">
+            <i class="bi bi-calendar-check"></i>ĐẶT LỊCH NGAY
+        </a>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    function filterAlbums(state, btn) {
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.album-item').forEach(item => {
+            item.style.display = (state === 'all' || item.dataset.state === state) ? '' : 'none';
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const slides = document.querySelectorAll(".hero-slide");
+        const dots   = document.querySelectorAll(".dot");
+        const bar    = document.getElementById("heroProgressBar");
+        const slider = document.getElementById("heroSlider");
+        if (!slides.length || !bar || !slider) return;
+
+        let current  = 0;
+        const DURATION = 4000;
+        let interval;
+
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove("active"));
+            dots.forEach(d => d.classList.remove("active"));
+            slides[index].classList.add("active");
+            dots[index].classList.add("active");
+            current = index;
+            resetProgress();
+        }
+
+        function nextSlide() {
+            showSlide((current + 1) % slides.length);
+        }
+
+        function resetProgress() {
+            bar.style.transition = "none";
+            bar.style.width = "0%";
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                bar.style.transition = `width ${DURATION}ms linear`;
+                bar.style.width = "100%";
+            }));
+        }
+
+        function startAuto() {
+            clearInterval(interval);
+            interval = setInterval(nextSlide, DURATION);
+        }
+
+        dots.forEach(dot => {
+            dot.addEventListener("click", function () {
+                showSlide(parseInt(this.dataset.index));
+                startAuto();
+            });
+        });
+
+        slider.addEventListener("mouseenter", () => {
+            clearInterval(interval);
+            bar.style.transition = "none";
+        });
+
+        slider.addEventListener("mouseleave", () => {
+            startAuto();
+            resetProgress();
+        });
+
+        resetProgress();
+        startAuto();
+    });
+</script>
+}

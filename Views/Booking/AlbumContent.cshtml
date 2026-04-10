@@ -1,0 +1,45 @@
+﻿@model PhoStudioMVC.Models.Entities.CloudAlbum
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Nội dung Album";
+}
+
+@section Styles {
+<style>
+    .album-header { padding:120px 0 56px; background:linear-gradient(160deg,#1a1208 0%,#2d1f0a 60%,#1a1208 100%); border-bottom:1px solid rgba(203,163,92,.2); }
+    .album-content-card { background:#fff; border:1px solid #EDE8DF; border-radius:14px; padding:32px; box-shadow:0 4px 24px rgba(43,43,43,.09); max-width:700px; margin:0 auto; }
+    .btn-open { background:#CBA35C; color:#fff; border:none; border-radius:10px; padding:13px 28px; font-weight:700; font-size:1rem; transition:all .3s ease; text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
+    .btn-open:hover { background:#B8941F; color:#fff; transform:translateY(-2px); box-shadow:0 6px 16px rgba(203,163,92,.35); }
+</style>
+}
+
+<header class="album-header">
+    <div class="container">
+        <h1 class="text-white mb-2" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;">
+            <i class="bi bi-images me-2" style="color:#CBA35C;"></i>Album của bạn
+        </h1>
+        <p class="text-muted" style="font-weight:300;">Ngày chụp: @Model.Booking?.BookingDate.ToString("dd/MM/yyyy")</p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:48px 0;min-height:60vh;">
+    <div class="container">
+        <div class="album-content-card" data-aos="fade-up">
+            <div class="text-center mb-4">
+                <i class="bi bi-cloud-check-fill mb-3 d-block" style="font-size:3rem;color:#22C55E;"></i>
+                <h4 style="font-family:'Playfair Display',serif;color:#2B2B2B;">Album đã được mở khóa</h4>
+                <p style="color:#6B6B6B;font-size:.9rem;">Nhấn nút bên dưới để xem toàn bộ ảnh của bạn.</p>
+            </div>
+            <div class="text-center">
+                <a href="@Model.AlbumUrl" target="_blank" rel="noopener noreferrer" class="btn-open">
+                    <i class="bi bi-box-arrow-up-right"></i>Mở Album Ảnh
+                </a>
+            </div>
+            <div class="text-center mt-4">
+                <a asp-controller="Client" asp-action="MyAlbums" style="color:#6B6B6B;font-size:.88rem;text-decoration:none;">
+                    <i class="bi bi-arrow-left me-1"></i>Quay lại My Albums
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

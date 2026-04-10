@@ -1,0 +1,160 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Đặt Lịch";
+}
+
+@section Styles {
+    <style>
+        .page-header {
+            padding: 150px 0 80px;
+            background: linear-gradient(to bottom, rgba(15,15,15,1) 0%, rgba(5,5,5,1) 100%);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .booking-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 40px;
+        }
+    </style>
+}
+
+<!-- Page Header -->
+<header class="page-header text-center">
+    <div class="container" data-aos="fade-up">
+        <h5 class="text-accent mb-4 letter-spacing-1">ĐẶT LỊCH NGAY HÔM NAY</h5>
+        <h1 class="display-3 text-white mb-4">Mẫu Trực Tuyến</h1>
+        <p class="text-muted max-w-600 mx-auto" style="font-weight: 300; font-size: 1.15rem;">Chọn ngày, giờ và các thông tin cần thiết để chúng tôi mang đến cho bạn trải nghiệm nhiếp ảnh cao cấp nhất.</p>
+    </div>
+</header>
+
+<!-- Booking Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-5">
+            
+            <!-- LEFT: Date/Time Picker -->
+            <div class="col-lg-7" data-aos="fade-right">
+                <h3 class="text-white mb-4">1. Chọn Thời Gian</h3>
+                <div class="booking-card mb-4">
+                    
+                    <label class="form-label text-muted mb-2">Ngày Chụp</label>
+                    <input type="date" class="form-control premium-input mb-4" id="bookingDate" name="bookingDate" form="simulate-booking-form" required>
+
+                    <label class="form-label text-muted mb-3 d-block">Giờ Khả Dụng</label>
+                    <div class="row g-3" id="time-slots-container">
+                        <div class="col-4 col-md-3">
+                            <div class="time-slot booked" data-time="09:00 AM">09:00 AM</div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="time-slot available" data-time="10:00 AM">10:00 AM</div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="time-slot available" data-time="11:00 AM">11:00 AM</div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="time-slot booked" data-time="01:00 PM">01:00 PM</div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="time-slot available" data-time="02:00 PM">02:00 PM</div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="time-slot available" data-time="03:00 PM">03:00 PM</div>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <div class="time-slot available" data-time="04:00 PM">04:00 PM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-white mb-4">2. Thông Tin Của Bạn</h3>
+                <div class="booking-card">
+                    <form asp-controller="Booking" asp-action="CreateBooking" method="post" id="simulate-booking-form" class="needs-validation" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="booking-time-input" name="StartTime" required>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <input type="text" id="fullName" name="FullName" class="form-control premium-input" placeholder="Họ và Tên *" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="email" id="email" name="email" class="form-control premium-input" placeholder="Email (Tuữ chọn) ">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="tel" id="phone" name="phone" class="form-control premium-input" placeholder="Số Điện Thoại *" required>
+                            </div>
+                            <div class="col-md-6">
+                                <select id="service" name="ServicePackageId" class="form-select premium-input" required style="background-color: var(--primary-color);">
+                                    <option value="" disabled selected>Gói Dịch Vụ *</option>
+                                    @foreach (PhoStudioMVC.Models.Entities.ServicePackage pkg in ViewBag.ServicePackages)
+                                    {
+                                        <option value="@pkg.Id">@pkg.Name - @pkg.Price.ToString("N0")đ</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <textarea id="notes" name="Notes" class="form-control premium-input" rows="3" placeholder="Yêu cầu đặc biệt nếu có..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT: Booking Summary -->
+            <div class="col-lg-5" data-aos="fade-left" data-aos-delay="200">
+                <h3 class="text-white mb-4">Tóm Tắt Lịch Hẹn</h3>
+                <div class="booking-card sticky-top" style="top: 120px;">
+                    <h4 class="text-accent mb-4">Gói Chụp - Phố Studio</h4>
+                    <ul class="list-unstyled mb-4">
+                        <li class="d-flex justify-content-between mb-3 text-muted border-bottom border-secondary pb-3">
+                            <span><i class="bi bi-calendar3 text-white me-2"></i> Ngày đăng ký:</span>
+                            <span class="text-white" id="selected-date-summary">Chưa chọn ngày</span>
+                        </li>
+                        <li class="d-flex justify-content-between mb-3 text-muted border-bottom border-secondary pb-3">
+                            <span><i class="bi bi-clock text-white me-2"></i> Giờ chụp:</span>
+                            <span class="text-white" id="selected-time-summary">Chưa chọn giờ</span>
+                        </li>
+                        <li class="d-flex justify-content-between mb-3 text-muted pb-2">
+                            <span><i class="bi bi-geo-alt text-white me-2"></i> Địa điểm:</span>
+                            <span class="text-white text-end">Phố Studio<br><small class="text-muted">123 Phố Cổ, Hà Nội</small></span>
+                        </li>
+                    </ul>
+                    
+                    <div class="alert alert-dark border-secondary text-muted small mb-4" role="alert">
+                        <i class="bi bi-info-circle text-accent me-2"></i> Bạn không cần thanh toán ngay bây giờ. Đội ngũ của chúng tôi sẽ liên hệ lại với bạn để xác nhận thông tin chi tiết.
+                    </div>
+
+                    <button type="submit" form="simulate-booking-form" class="btn btn-premium-solid w-100 py-3 d-flex align-items-center justify-content-center">
+                        XÁC NHẬN ĐẶT LỊCH <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Payment QR Modal -->
+<div class="modal fade" id="payment-modal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border border-secondary text-white">
+            <div class="modal-header border-secondary text-center">
+                <h5 class="modal-title w-100 font-serif text-accent" id="paymentModalLabel"><i class="bi bi-qr-code-scan me-2"></i>Thanh Toán Cọc</h5>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div id="payment-booking-summary" class="mb-3 text-center"></div>
+                <p class="text-white-50 small mb-3">⏳ Thời gian giữ chỗ còn lại: <span class="text-warning fw-bold" id="lock-timer">15:00</span></p>
+                <h6 class="mb-2">Số tiền cọc (30%): <strong class="text-accent fs-4" id="deposit-amount">0đ</strong></h6>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="Mã QR thanh toán" class="img-fluid bg-white p-3 rounded-3 mt-3 mb-3" style="width: 200px; height: 200px;">
+                <p class="small text-muted mb-0">Quét mã QR qua app ngân hàng và chuyển đúng số tiền cọc.<br>Bấm <strong>"Đã Chuyển Khoản"</strong> sau khi hoàn tất.</p>
+            </div>
+            <div class="modal-footer border-secondary justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" id="payment-cancel-btn">Hủy/Đóng</button>
+                <button type="button" class="btn btn-premium" id="payment-confirm-btn"><i class="bi bi-check-circle me-1"></i>Đã Chuyển Khoản</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/js/booking.js"></script>
+}

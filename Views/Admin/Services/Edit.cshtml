@@ -1,0 +1,45 @@
+﻿@model PhoStudioMVC.Models.Entities.ServicePackage
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Sửa gói dịch vụ";
+}
+
+<div class="admin-page-header">
+    <h1>Sửa gói dịch vụ #@Model.Id</h1>
+    <p>Cập nhật thông tin gói chụp ảnh.</p>
+</div>
+
+<div class="dash-card">
+    <form asp-controller="Admin" asp-action="ServiceEdit" asp-route-id="@Model.Id" method="post" class="row g-3">
+        @Html.AntiForgeryToken()
+        <div class="col-md-6">
+            <label class="form-label text-muted">Tên gói</label>
+            <input name="name" value="@Model.Name" class="form-control" required />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted">Giá (VND)</label>
+            <input name="price" type="number" value="@Model.Price" class="form-control" min="10000" required />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted">Thời lượng (phút)</label>
+            <input name="durationMinutes" type="number" value="@Model.DurationMinutes" class="form-control" min="30" max="480" required />
+        </div>
+        <div class="col-12">
+            <label class="form-label text-muted">Mô tả</label>
+            <textarea name="description" class="form-control" rows="3">@Model.Description</textarea>
+        </div>
+        <div class="col-12">
+            <label class="form-label text-muted">Thumbnail URL</label>
+            <input name="thumbnailUrl" value="@Model.ThumbnailUrl" class="form-control" />
+        </div>
+        <div class="col-12 form-check">
+            <input class="form-check-input" type="checkbox" name="isActive" value="true" checked="@Model.IsActive" id="isActive">
+            <input type="hidden" name="isActive" value="false" />
+            <label class="form-check-label text-white" for="isActive">Đang hoạt động</label>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-premium">Lưu thay đổi</button>
+            <a asp-controller="Admin" asp-action="Services" class="btn btn-outline-light">Quay lại</a>
+        </div>
+    </form>
+</div>

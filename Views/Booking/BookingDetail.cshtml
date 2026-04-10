@@ -1,0 +1,106 @@
+﻿@model PhoStudioMVC.Models.Entities.Booking
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Chi tiết booking";
+}
+
+@section Styles {
+<style>
+    .detail-header { padding: 120px 0 56px; background: linear-gradient(160deg, #1a1208 0%, #2d1f0a 60%, #1a1208 100%); border-bottom: 1px solid rgba(203,163,92,0.2); }
+    .detail-card { background: #fff; border: 1px solid #EDE8DF; border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(43,43,43,0.07); margin-bottom: 24px; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F5EFE6; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: #6B6B6B; font-size: 0.9rem; }
+    .detail-value { color: #2B2B2B; font-weight: 600; font-size: 0.93rem; }
+</style>
+}
+
+<header class="detail-header">
+    <div class="container" data-aos="fade-in">
+        <h5 style="color:#E8C47A !important;font-size:.82rem;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px;text-shadow:0 1px 6px rgba(0,0,0,0.5);">CHI TIẾT LỊCH HẸN</h5>
+        <h1 style="font-family:'Playfair Display',serif !important;font-size:2rem !important;font-weight:700 !important;color:#FFFFFF !important;text-transform:none !important;letter-spacing:0 !important;margin-bottom:8px;text-shadow:0 3px 16px rgba(0,0,0,0.55);">
+            Chi tiết lịch hẹn
+        </h1>
+        <p style="color:rgba(255,255,255,0.88) !important;font-weight:300;text-shadow:0 1px 8px rgba(0,0,0,0.4);">Mã: <strong style="color:#E8C47A;">#@Model.Id.Substring(0,8).ToUpper()</strong></p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:48px 0;min-height:60vh;">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="detail-card">
+                    <h5 style="font-family:'Playfair Display',serif;color:#2B2B2B;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #CBA35C;">
+                        <i class="bi bi-info-circle me-2" style="color:#CBA35C;"></i>Thông tin lịch hẹn
+                    </h5>
+                    <div class="detail-row">
+                        <span class="detail-label">Gói dịch vụ</span>
+                        <span class="detail-value">@Model.ServicePackage?.Name</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Trạng thái</span>
+                        <span class="detail-value">@Model.Status</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Ngày chụp</span>
+                        <span class="detail-value">@Model.BookingDate.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Khung giờ</span>
+                        <span class="detail-value">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Tổng tiền</span>
+                        <span class="detail-value" style="color:#CBA35C;">@Model.TotalAmount.ToString("N0")đ</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Tiền cọc</span>
+                        <span class="detail-value" style="color:#22C55E;">@Model.DepositAmount.ToString("N0")đ</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Ghi chú</span>
+                        <span class="detail-value" style="max-width:320px;text-align:right;word-break:break-word;white-space:pre-line;">
+                            @{
+                                var notes = Model.Notes ?? "";
+                                notes = notes
+                                    .Replace("KhÃ¡ch:", "Khách:")
+                                    .Replace("SÄT:", "SĐT:")
+                                    .Replace("SÄ\u0090T:", "SĐT:");
+                            }
+                            @(string.IsNullOrWhiteSpace(notes) ? "Không có" : notes)
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                @if (Model.CloudAlbum != null)
+                {
+                    <div class="detail-card" style="border-left:3px solid #22C55E;">
+                        <h5 style="font-family:'Playfair Display',serif;color:#2B2B2B;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #22C55E;">
+                            <i class="bi bi-cloud-check me-2" style="color:#22C55E;"></i>Thông tin Album & OTP
+                        </h5>
+                        <div class="detail-row">
+                            <span class="detail-label">Mã OTP</span>
+                            <span style="font-size:1.4rem;font-weight:700;color:#CBA35C;letter-spacing:3px;">@Model.CloudAlbum.SecureOTP</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Ngày hết hạn</span>
+                            <span class="detail-value">@Model.CloudAlbum.ExpiryDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Link hệ thống</span>
+                            <a href="@Model.CloudAlbum.AlbumUrl" target="_blank" style="color:#3B82F6;text-decoration:none;font-weight:500;">Mở liên kết <i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                        </div>
+                    </div>
+                }
+
+                <div class="detail-card">
+                    <a asp-action="MyBookings" style="display:flex;align-items:center;gap:8px;color:#CBA35C;font-weight:600;text-decoration:none;transition:opacity .25s ease;" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+                        <i class="bi bi-arrow-left"></i>Quay lại lịch sử
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

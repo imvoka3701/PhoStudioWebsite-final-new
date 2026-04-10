@@ -1,0 +1,53 @@
+﻿@model PhoStudioMVC.Models.Entities.CloudAlbum
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Xác thực OTP album";
+}
+
+@section Styles {
+<style>
+    .otp-header { padding:120px 0 56px; background:linear-gradient(160deg,#1a1208 0%,#2d1f0a 60%,#1a1208 100%); border-bottom:1px solid rgba(203,163,92,.2); text-align:center; }
+    .otp-card { background:#fff; border:1px solid #EDE8DF; border-radius:16px; padding:36px; max-width:480px; margin:0 auto; box-shadow:0 4px 24px rgba(43,43,43,.09); }
+    .otp-input { background:#FAF7F2; border:1.5px solid #EDE8DF; border-radius:10px; padding:14px; font-size:1.8rem; font-weight:700; letter-spacing:8px; text-align:center; color:#2B2B2B; width:100%; transition:border-color .25s ease; }
+    .otp-input:focus { outline:none; border-color:#CBA35C; box-shadow:0 0 0 3px rgba(203,163,92,.12); }
+    .btn-verify { background:#CBA35C; color:#fff; border:none; border-radius:10px; padding:13px; font-weight:700; font-size:1rem; width:100%; transition:all .3s ease; cursor:pointer; }
+    .btn-verify:hover { background:#B8941F; transform:translateY(-2px); box-shadow:0 6px 16px rgba(203,163,92,.35); }
+    .info-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F5EFE6; font-size:.88rem; }
+    .info-row:last-child { border:none; }
+</style>
+}
+
+<header class="otp-header">
+    <div class="container" data-aos="fade-up">
+        <h1 class="text-white mb-2" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;">
+            <i class="bi bi-shield-lock me-2" style="color:#CBA35C;"></i>Xác Thực Album
+        </h1>
+        <p class="text-muted" style="font-weight:300;">Nhập mã OTP 6 chữ số do thợ chụp cung cấp.</p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:48px 0;min-height:60vh;">
+    <div class="container">
+        <div class="otp-card" data-aos="fade-up">
+            <div class="mb-4 pb-4" style="border-bottom:1px solid #EDE8DF;">
+                <div class="info-row"><span style="color:#6B6B6B;">Ngày chụp</span><strong style="color:#2B2B2B;">@Model.Booking?.BookingDate.ToString("dd/MM/yyyy")</strong></div>
+                <div class="info-row"><span style="color:#6B6B6B;">Ngày tạo album</span><strong style="color:#2B2B2B;">@Model.CreatedAt.ToString("dd/MM/yyyy")</strong></div>
+                <div class="info-row"><span style="color:#6B6B6B;">Hết hạn</span><strong style="color:#CBA35C;">@Model.ExpiryDate.ToString("dd/MM/yyyy")</strong></div>
+            </div>
+
+            <form asp-controller="Client" asp-action="VerifyOTP" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="albumId" value="@Model.Id" />
+                <div class="mb-4">
+                    <label style="color:#2B2B2B;font-weight:600;font-size:.9rem;display:block;margin-bottom:10px;">Mã OTP 6 chữ số</label>
+                    <input type="text" name="otp" class="otp-input" placeholder="------" maxlength="6" autocomplete="one-time-code" required inputmode="numeric" pattern="[0-9]{6}">
+                </div>
+                <button type="submit" class="btn-verify"><i class="bi bi-shield-check me-2"></i>Xác Thực OTP</button>
+            </form>
+
+            <a asp-controller="Client" asp-action="MyAlbums" style="display:block;text-align:center;margin-top:16px;color:#6B6B6B;font-size:.88rem;text-decoration:none;">
+                <i class="bi bi-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+    </div>
+</section>

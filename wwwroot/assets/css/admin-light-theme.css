@@ -1,0 +1,501 @@
+/* ========================================
+   ADMIN DASHBOARD - PHỐ STUDIO PREMIUM THEME
+   Aligned with landing page beige & gold design system
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Pho Studio Brand Colors */
+  --bg-primary:    #F5EFE6;
+  --bg-secondary:  #FAF7F2;
+  --bg-card:       #FFFFFF;
+  --accent:        #CBA35C;
+  --accent-hover:  #B8941F;
+  --accent-light:  rgba(203, 163, 92, 0.10);
+  --accent-lighter:rgba(203, 163, 92, 0.05);
+  --text-dark:     #111111;
+  --text-body:     #3A3A3A;
+  --text-muted:    #6B6B6B;
+  --border:        rgba(203, 163, 92, 0.18);
+  --border-light:  #EDE8DF;
+
+  /* Shadows */
+  --shadow-card:   0 2px 12px rgba(43, 43, 43, 0.07);
+  --shadow-hover:  0 8px 24px rgba(43, 43, 43, 0.12);
+  --shadow-sm:     0 1px 4px rgba(43, 43, 43, 0.06);
+
+  /* Status */
+  --success:       #22C55E;
+  --success-bg:    rgba(34, 197, 94, 0.08);
+  --warning:       #F59E0B;
+  --warning-bg:    rgba(245, 158, 11, 0.08);
+  --danger:        #EF4444;
+  --danger-bg:     rgba(239, 68, 68, 0.08);
+  --info:          #3B82F6;
+  --info-bg:       rgba(59, 130, 246, 0.08);
+}
+
+/* ==========================================
+   BASE
+   ========================================== */
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-dark);
+  font-family: 'Inter', sans-serif;
+}
+
+.admin-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.admin-content {
+  margin-left: 250px;
+  padding: 32px;
+  flex-grow: 1;
+  width: calc(100% - 250px);
+  background: var(--bg-primary);
+}
+
+/* ==========================================
+   SIDEBAR
+   ========================================== */
+
+.dashboard-sidebar {
+  width: 250px;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-light);
+  padding: 24px 16px;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-sidebar::-webkit-scrollbar { width: 4px; }
+.dashboard-sidebar::-webkit-scrollbar-track { background: transparent; }
+.dashboard-sidebar::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+
+.sidebar-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  color: var(--accent);
+  font-weight: 700;
+  display: block;
+  margin-bottom: 32px;
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: 2px;
+  transition: color 0.3s ease;
+}
+
+.sidebar-brand:hover { color: var(--accent-hover); }
+
+.sidebar-nav { list-style: none; padding: 0; margin: 0; }
+
+.sidebar-nav-item { margin-bottom: 4px; }
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  color: var(--text-body);
+  text-decoration: none;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sidebar-nav-link:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+.sidebar-nav-link.active {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-left: 3px solid var(--accent);
+  padding-left: 11px;
+  font-weight: 600;
+}
+
+.sidebar-nav-link i { font-size: 1.1rem; }
+
+.logout-btn { color: #EF4444 !important; }
+.logout-btn:hover { background: rgba(239,68,68,0.08) !important; color: #DC2626 !important; }
+
+/* ==========================================
+   PAGE HEADER
+   ========================================== */
+
+.admin-page-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+  padding: 28px 32px;
+  margin: -32px -32px 32px -32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-page-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0 0 4px 0;
+}
+
+.admin-page-header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 300;
+  margin: 0;
+}
+
+/* Legacy header tag used in some views */
+header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+  padding: 28px 32px;
+  margin: -32px -32px 32px -32px;
+  box-shadow: var(--shadow-sm);
+}
+
+header h1 {
+  font-family: 'Playfair Display', serif;
+  color: var(--text-dark) !important;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+header p { color: var(--text-muted) !important; }
+
+/* ==========================================
+   STAT / DASH CARDS
+   ========================================== */
+
+.dash-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dash-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.dash-card h3,
+.dash-card h4 {
+  font-family: 'Playfair Display', serif;
+  color: #1A1A1A !important;
+  font-weight: 700;
+}
+
+.dash-card p,
+.dash-card .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Stat value inside dash-card */
+.dash-card h3.stat-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-dark) !important;
+}
+
+/* Colored top border accent cards */
+.dash-card.border-info    { border-top: 3px solid var(--info) !important; }
+.dash-card.border-warning { border-top: 3px solid var(--warning) !important; }
+.dash-card.border-success { border-top: 3px solid var(--success) !important; }
+.dash-card.border-danger  { border-top: 3px solid var(--danger) !important; }
+
+/* Bootstrap .card used in export section */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+.card-body { padding: 24px; }
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  color: var(--text-dark);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* ==========================================
+   TYPOGRAPHY
+   ========================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+h1 { font-family: 'Playfair Display', serif; font-size: 1.9rem; }
+h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; }
+h3 { font-family: 'Playfair Display', serif; font-size: 1.35rem; }
+h4 { font-size: 1.15rem; font-weight: 600; }
+h5 { font-size: 1rem; font-weight: 600; }
+h6 { font-size: 0.9rem; font-weight: 600; }
+
+.text-muted  { color: var(--text-muted)  !important; }
+.text-accent { color: var(--accent)      !important; }
+
+/* ==========================================
+   TABLES
+   ========================================== */
+
+.table-premium {
+  color: var(--text-body);
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table-premium thead {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--accent);
+}
+
+.table-premium th {
+  color: var(--accent);
+  font-weight: 600;
+  padding: 14px 16px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 2px solid var(--accent);
+}
+
+.table-premium td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-body);
+  font-size: 0.93rem;
+}
+
+.table-premium tbody tr { transition: background 0.2s ease; }
+
+.table-premium tbody tr:hover {
+  background: var(--accent-lighter);
+  color: var(--text-dark);
+}
+
+/* ==========================================
+   BUTTONS
+   ========================================== */
+
+.btn-premium {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 22px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-premium:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(203,163,92,0.35);
+  color: #fff;
+}
+
+.btn-outline-accent {
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-accent:hover {
+  background: var(--accent-light);
+  color: var(--accent-hover);
+}
+
+/* Bootstrap btn-success used in export */
+.btn-success {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   FORMS
+   ========================================== */
+
+.form-control,
+.form-select {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  color: var(--text-dark);
+  border-radius: 8px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  font-size: 0.93rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  color: var(--text-dark);
+  box-shadow: 0 0 0 3px rgba(203,163,92,0.15);
+}
+
+.form-label {
+  color: var(--text-body);
+  font-weight: 500;
+  font-size: 0.88rem;
+  margin-bottom: 6px;
+}
+
+/* ==========================================
+   BADGES
+   ========================================== */
+
+.badge {
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+/* ==========================================
+   ALERTS
+   ========================================== */
+
+.alert { border-radius: 10px; }
+
+.alert-success { background: var(--success-bg); border-color: var(--success); color: #16A34A; }
+.alert-warning { background: var(--warning-bg); border-color: var(--warning); color: #D97706; }
+.alert-danger  { background: var(--danger-bg);  border-color: var(--danger);  color: #DC2626; }
+.alert-info    { background: var(--info-bg);    border-color: var(--info);    color: #2563EB; }
+
+/* ==========================================
+   MODALS
+   ========================================== */
+
+.modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  box-shadow: var(--shadow-hover);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  border-radius: 14px 14px 0 0;
+}
+
+.modal-title { color: var(--text-dark); font-weight: 600; }
+.modal-body  { color: var(--text-body); }
+.modal-footer { border-top: 1px solid var(--border-light); background: var(--bg-secondary); border-radius: 0 0 14px 14px; }
+
+/* ==========================================
+   MOBILE
+   ========================================== */
+
+@media (max-width: 768px) {
+  .admin-wrapper { flex-direction: column; }
+
+  .dashboard-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--border-light);
+    display: none;
+  }
+
+  .dashboard-sidebar.show { display: block; }
+
+  .admin-content { margin-left: 0; width: 100%; padding: 20px; }
+
+  header,
+  .admin-page-header { margin: -20px -20px 20px -20px; padding: 20px; }
+}
+
+/* ==========================================
+   SCROLLBAR
+   ========================================== */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dash-card { animation: fadeInUp 0.35s ease both; }
+
+.border-secondary { border-color: var(--border-light) !important; }
+
+/* ==========================================
+   PAGINATION
+   ========================================== */
+
+.pagination .page-link {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-body);
+  transition: all 0.25s ease;
+}
+
+.pagination .page-link:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pagination .page-item.active .page-link {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ==========================================
+   ADMIN PAGE HEADER (sidebar avatar)
+   ========================================== */
+
+.dashboard-sidebar .text-center.mb-4.pb-4 {
+  border-bottom: 1px solid var(--border-light) !important;
+}

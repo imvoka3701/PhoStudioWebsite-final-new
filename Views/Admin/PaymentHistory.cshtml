@@ -1,0 +1,148 @@
+﻿@model PaymentHistoryViewModel
+@using PhoStudioMVC.Models.ViewModels
+@using PhoStudioMVC.Models.Enums
+@{
+    ViewData["Title"] = "Lịch sử thanh toán";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-page-header">
+    <h1>💳 Lịch sử thanh toán</h1>
+    <p>Tra cứu và lọc các giao dịch thanh toán của studio.</p>
+</div>
+
+<div class="dash-card mb-4">
+    <form method="get" asp-action="PaymentHistory" class="row g-2 align-items-end">
+        <div class="col-auto">
+            <label class="form-label">Tháng</label>
+            <select name="filterMonth" class="form-select form-select-sm">
+                <option value="">-- Tháng --</option>
+                @for (int m = 1; m <= 12; m++)
+                {
+                    <option value="@m" selected="@(Model.FilterMonth == m)">Tháng @m</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Năm</label>
+            <input name="filterYear" type="number" class="form-control form-control-sm" placeholder="Năm" value="@Model.FilterYear" style="width:90px" />
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Loại</label>
+            <select name="filterType" class="form-select form-select-sm">
+                <option value="">-- Loại thanh toán --</option>
+                <option value="0" selected="@(Model.FilterType == PaymentType.OnlineDeposit)">Online (VNPay)</option>
+                <option value="1" selected="@(Model.FilterType == PaymentType.CashRemainder)">Tiền mặt</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Khách hàng</label>
+            <input name="filterClientName" class="form-control form-control-sm" placeholder="Tên khách hàng..." value="@Model.FilterClientName" style="width:180px" />
+        </div>
+        <div class="col-auto d-flex gap-2">
+            <button type="submit" class="btn btn-premium btn-sm"><i class="bi bi-search me-1"></i>Lọc</button>
+            <a asp-action="PaymentHistory" class="btn btn-outline-accent btn-sm">Reset</a>
+        </div>
+    </form>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="dash-card border-info border-top border-3 text-center">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">💻 Online (VNPay)</p>
+            <div style="font-size:1.6rem;font-weight:700;color:var(--info);">@Model.TotalOnline.ToString("N0")đ</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dash-card border-warning border-top border-3 text-center">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">💵 Tiền mặt</p>
+            <div style="font-size:1.6rem;font-weight:700;color:var(--warning);">@Model.TotalCash.ToString("N0")đ</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dash-card border-success border-top border-3 text-center">
+            <p class="mb-1" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;">✅ Tổng cộng</p>
+            <div style="font-size:1.6rem;font-weight:700;color:var(--success);">@Model.GrandTotal.ToString("N0")đ</div>
+        </div>
+    </div>
+</div>
+
+<div class="dash-card">
+    <div class="table-responsive">
+        <table class="table table-premium align-middle">
+            <thead>
+                <tr>
+                    <th style="width:5%">STT</th>
+                    <th style="width:10%">Mã lịch</th>
+                    <th style="width:20%">Khách hàng</th>
+                    <th style="width:20%">Gói dịch vụ</th>
+                    <th style="width:10%">Loại TT</th>
+                    <th style="width:12%" class="text-end">Số tiền</th>
+                    <th style="width:15%">Transaction ID</th>
+                    <th style="width:15%">Thời gian</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Transactions.Any())
+                {
+                    @foreach (var (t, i) in Model.Transactions.Select((t, i) => ((TransactionRowViewModel)t, i)))
+                    {
+                        <tr>
+                            <td style="color:var(--text-muted);">@((Model.CurrentPage - 1) * Model.PageSize + i + 1)</td>
+                            <td>
+                                <a href="@Url.Action("BookingDetail", "Admin", new { id = t.BookingId })" style="color:var(--accent);font-weight:600;text-decoration:none;">
+                                    #@(t.BookingId?.PadLeft(6, '0') ?? "—")
+                                </a>
+                            </td>
+                            <td>@t.ClientName</td>
+                            <td>@t.ServiceName</td>
+                            <td>
+                                @if (t.PaymentType == PaymentType.OnlineDeposit)
+                                {
+                                    <span class="badge" style="background:var(--info-bg);color:var(--info);">Online</span>
+                                }
+                                else
+                                {
+                                    <span class="badge" style="background:var(--warning-bg);color:var(--warning);">Tiền mặt</span>
+                                }
+                            </td>
+                            <td class="text-end fw-semibold" style="color:var(--text-dark);">@t.Amount.ToString("N0")đ</td>
+                            <td><small style="color:var(--text-muted);">@(string.IsNullOrEmpty(t.GatewayTxId) ? "—" : t.GatewayTxId)</small></td>
+                            <td><small style="color:var(--text-muted);">@t.CompletedAt?.ToString("dd/MM/yyyy HH:mm")</small></td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="8" class="text-center py-5" style="color:var(--text-muted);">Không có giao dịch nào.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @if (Model.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="PaymentHistory" asp-route-page="@(Model.CurrentPage - 1)" asp-route-filterMonth="@Model.FilterMonth" asp-route-filterYear="@Model.FilterYear" asp-route-filterType="@((int?)Model.FilterType)" asp-route-filterClientName="@Model.FilterClientName">← Trước</a>
+                    </li>
+                }
+                @for (int p = 1; p <= Model.TotalPages; p++)
+                {
+                    <li class="page-item @(p == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="PaymentHistory" asp-route-page="@p" asp-route-filterMonth="@Model.FilterMonth" asp-route-filterYear="@Model.FilterYear" asp-route-filterType="@((int?)Model.FilterType)" asp-route-filterClientName="@Model.FilterClientName">@p</a>
+                    </li>
+                }
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="PaymentHistory" asp-route-page="@(Model.CurrentPage + 1)" asp-route-filterMonth="@Model.FilterMonth" asp-route-filterYear="@Model.FilterYear" asp-route-filterType="@((int?)Model.FilterType)" asp-route-filterClientName="@Model.FilterClientName">Tiếp →</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

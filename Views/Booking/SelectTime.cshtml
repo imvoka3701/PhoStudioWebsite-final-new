@@ -1,0 +1,296 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Chọn Ngày Giờ";
+    var selectedPackageId = (int)(ViewBag.SelectedPackageId ?? 0);
+}
+
+@section Styles {
+    <style>
+        .page-header {
+            padding: 140px 0 72px;
+            background: linear-gradient(160deg, #1a1208 0%, #2d1f0a 60%, #1a1208 100%);
+            border-bottom: 1px solid rgba(203,163,92,0.2);
+        }
+
+        /* Light booking card */
+        .booking-card {
+            background: #FFFFFF;
+            border: 1px solid #EDE8DF;
+            border-radius: 14px;
+            padding: 36px;
+            box-shadow: 0 2px 16px rgba(43,43,43,0.07);
+        }
+
+        /* Section heading */
+        .booking-section-title {
+            font-family: 'Playfair Display', serif;
+            color: #2B2B2B;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* Form labels */
+        .booking-card .form-label {
+            color: #4A4A4A;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: 6px;
+        }
+
+        /* Inputs */
+        .booking-card .form-control,
+        .booking-card textarea.form-control {
+            background: #FAF7F2;
+            border: 1.5px solid #EDE8DF;
+            border-radius: 10px;
+            color: #2B2B2B;
+            font-size: 0.93rem;
+            transition: border-color .25s ease, box-shadow .25s ease;
+        }
+
+        .booking-card .form-control:focus,
+        .booking-card textarea.form-control:focus {
+            background: #FFFFFF;
+            border-color: #CBA35C;
+            box-shadow: 0 0 0 3px rgba(203,163,92,0.15);
+            color: #2B2B2B;
+        }
+
+        .booking-card .form-control::placeholder { color: #9B9B9B; }
+
+        /* Time slot buttons */
+        .time-slot-btn {
+            background: #FAF7F2;
+            border: 1.5px solid #EDE8DF;
+            border-radius: 10px;
+            color: #4A4A4A;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: all .2s ease;
+            user-select: none;
+        }
+
+        .time-slot-btn:hover {
+            border-color: #CBA35C;
+            color: #CBA35C;
+            background: rgba(203,163,92,0.06);
+        }
+
+        .time-slot-btn.active {
+            background: #CBA35C;
+            color: #fff;
+            border-color: #CBA35C;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(203,163,92,0.35);
+        }
+
+        /* Summary card */
+        .summary-card {
+            background: #FFFFFF;
+            border: 1px solid #EDE8DF;
+            border-radius: 14px;
+            padding: 32px;
+            box-shadow: 0 2px 16px rgba(43,43,43,0.07);
+        }
+
+        .summary-card h4 {
+            font-family: 'Playfair Display', serif;
+            color: #CBA35C;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #F5EFE6;
+            font-size: .9rem;
+        }
+
+        .summary-row:last-child { border: none; }
+        .summary-label { color: #6B6B6B; }
+        .summary-value { color: #2B2B2B; font-weight: 600; }
+
+        .info-alert {
+            background: rgba(203,163,92,0.08);
+            border: 1px solid rgba(203,163,92,0.25);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: .85rem;
+            color: #4A4A4A;
+            margin-bottom: 20px;
+        }
+
+        /* Submit button */
+        .btn-book {
+            background: #CBA35C;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-weight: 700;
+            font-size: .95rem;
+            width: 100%;
+            transition: all .3s ease;
+            cursor: pointer;
+            letter-spacing: .3px;
+        }
+
+        .btn-book:hover {
+            background: #B8941F;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(203,163,92,.4);
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1.5px solid #EDE8DF;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            font-size: .88rem;
+            color: #6B6B6B;
+            width: 100%;
+            transition: all .25s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .btn-back:hover {
+            border-color: #CBA35C;
+            color: #CBA35C;
+        }
+    </style>
+}
+
+<!-- Page Header -->
+<header class="page-header text-center">
+    <div class="container" data-aos="fade-up">
+        <h5 style="color:#E8C47A !important;font-size:.82rem;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px;text-shadow:0 1px 6px rgba(0,0,0,0.5);">HOÀN TẤT ĐẶT LỊCH</h5>
+        <h1 style="font-family:'Playfair Display',serif !important;font-size:clamp(2.4rem,5vw,3.6rem) !important;font-weight:700 !important;color:#FFFFFF !important;text-transform:none !important;letter-spacing:0 !important;margin-bottom:16px;text-shadow:0 3px 16px rgba(0,0,0,0.55);">Chọn Ngày & Giờ</h1>
+        <p style="color:rgba(255,255,255,0.92) !important;font-weight:300;font-size:1.05rem;text-shadow:0 1px 8px rgba(0,0,0,0.4);">Gói đã chọn: <strong style="color:#E8C47A;">@ViewBag.SelectedPackageName</strong>. Vui lòng cung cấp thông tin và thời gian mong muốn.</p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:56px 0;">
+    <div class="container">
+        <form asp-action="CreateBooking" method="post" id="booking-form" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ServicePackageId" value="@selectedPackageId" />
+            <input type="hidden" name="StartTime" id="selected-time-input" required />
+
+            <div class="row g-5">
+                <!-- LEFT: Form Details -->
+                <div class="col-lg-7" data-aos="fade-right">
+                    <h3 class="booking-section-title">1. Thời Gian & Thông Tin</h3>
+                    <div class="booking-card mb-4">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Ngày Chụp</label>
+                                <input type="date" name="bookingDate" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" onchange="updateSummaryDate(this.value)">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Họ và Tên</label>
+                                <input type="text" name="FullName" class="form-control" placeholder="Nhập họ tên quý khách..." required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số Điện Thoại</label>
+                                <input type="tel" name="phone" class="form-control" placeholder="Nhập số điện thoại..." required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email <span style="color:#9B9B9B;font-weight:400;">(tùy chọn)</span></label>
+                                <input type="email" name="email" class="form-control" placeholder="Nhập email...">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Giờ Bắt Đầu</label>
+                                <div class="row g-2 mt-1">
+                                    @{
+                                        string[] slots = { "08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00" };
+                                        foreach (var slot in slots)
+                                        {
+                                            <div class="col-4 col-md-3">
+                                                <div class="time-slot-btn" onclick="selectTime('@slot', this)">@slot</div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                                <div id="time-error" style="display:none;color:#EF4444;font-size:.82rem;margin-top:6px;">
+                                    <i class="bi bi-exclamation-circle me-1"></i>Vui lòng chọn giờ chụp.
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Yêu Cầu / Concept <span style="color:#9B9B9B;font-weight:400;">(tùy chọn)</span></label>
+                                <textarea name="Notes" class="form-control" rows="3" placeholder="Mô tả ý tưởng hoặc yêu cầu đặc biệt..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Summary Sidebar -->
+                <div class="col-lg-5" data-aos="fade-left">
+                    <h3 class="booking-section-title">Tóm Tắt Lịch Hẹn</h3>
+                    <div class="summary-card sticky-top" style="top:120px;">
+                        <h4>@ViewBag.SelectedPackageName</h4>
+                        <div class="mt-3 mb-4">
+                            <div class="summary-row">
+                                <span class="summary-label"><i class="bi bi-calendar3 me-2" style="color:#CBA35C;"></i>Ngày chụp</span>
+                                <span class="summary-value" id="summary-date">Chưa chọn</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label"><i class="bi bi-clock me-2" style="color:#CBA35C;"></i>Giờ chụp</span>
+                                <span class="summary-value" id="summary-time">Chưa chọn</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label"><i class="bi bi-geo-alt me-2" style="color:#CBA35C;"></i>Địa điểm</span>
+                                <span class="summary-value text-end">Phố Studio<br><small style="color:#6B6B6B;font-weight:400;">123 Phố Cổ, Hà Nội</small></span>
+                            </div>
+                        </div>
+
+                        <div class="info-alert">
+                            <i class="bi bi-info-circle me-2" style="color:#CBA35C;"></i>
+                            Sau khi "Khóa lịch", bạn có <strong>15 phút</strong> để thanh toán cọc giữ chỗ chính thức.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn-book">
+                                <i class="bi bi-lock-fill me-2"></i>KHÓA LỊCH & THANH TOÁN CỌC
+                            </button>
+                            <a asp-action="Packages" class="btn-back">
+                                <i class="bi bi-arrow-left me-1"></i>Chọn lại gói
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function selectTime(time, element) {
+            document.getElementById('selected-time-input').value = time;
+            document.getElementById('summary-time').innerText = time;
+            
+            // Highlight selected button
+            document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function updateSummaryDate(val) {
+            if (val) {
+                const date = new Date(val);
+                document.getElementById('summary-date').innerText = date.toLocaleDateString('vi-VN');
+            }
+        }
+    </script>
+}

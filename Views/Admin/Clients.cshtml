@@ -1,0 +1,47 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.Entities.ApplicationUser>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Khách Hàng";
+}
+
+<div class="admin-page-header">
+    <h1>Quản lý Khách hàng</h1>
+    <p>Danh sách tài khoản khách hàng đã đăng ký.</p>
+</div>
+
+<div class="dash-card">
+    <div class="table-responsive">
+        <table class="table table-premium text-nowrap">
+            <thead>
+                <tr>
+                    <th>Họ và Tên</th>
+                    <th>Tên Tài Khoản</th>
+                    <th>Email</th>
+                    <th>Số Điện Thoại</th>
+                    <th>Ngày Tham Gia</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">Không có khách hàng nào.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td><strong>@c.FullName</strong></td>
+                            <td>@c.Username</td>
+                            <td>@c.Email</td>
+                            <td>@c.Phone</td>
+                            <td>@c.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

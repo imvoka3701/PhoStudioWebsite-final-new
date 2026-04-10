@@ -1,0 +1,204 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.Entities.Booking>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Lịch Chụp";
+}
+
+<div class="admin-page-header">
+    <h1>Điều phối Lịch chụp</h1>
+    <p>Phân công Thợ chụp cho các lịch hẹn sắp tới.</p>
+</div>
+
+<div class="dash-card">
+    <div class="table-responsive">
+        <table class="table table-premium text-nowrap">
+            <thead>
+                <tr>
+                    <th>Khách Hàng</th>
+                    <th>Ngày Chụp</th>
+                    <th>Gói Dịch Vụ</th>
+                    <th>Trạng Thái</th>
+                    <th>Trạng Thái Điều Phối</th>
+                    <th>Lịch Sử Thanh Toán</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">Không có lịch chụp nào.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var b in Model)
+                    {
+                        var collapseId = $"tx-{b.Id}";
+                        <tr>
+                            <td>
+                                <strong>@b.Client?.FullName</strong><br>
+                                <small class="text-muted">@b.Client?.Phone</small>
+                            </td>
+                            <td>
+                                @b.BookingDate.ToString("dd/MM/yyyy")<br>
+                                <small class="text-accent">@b.StartTime.ToString(@"hh\:mm")</small>
+                            </td>
+                            <td>@(b.ServicePackage?.Name ?? "N/A")</td>
+                            <td>
+                                @if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.TimeSlotLocked)
+                                {
+                                    <span class="badge bg-warning text-dark">Đang giữ chỗ</span>
+                                }
+                                else if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.Deposited)
+                                {
+                                    <span class="badge bg-info text-dark">Đã đặt cọc</span>
+                                }
+                                else if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.ShootCompleted)
+                                {
+                                    <span class="badge bg-primary">Đã chụp xong</span>
+                                }
+                                else if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.FullyPaid)
+                                {
+                                    <span class="badge bg-success">Hoàn thành</span>
+                                }
+                                else if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.Cancelled)
+                                {
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@b.Status</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(b.PhotographerId))
+                                {
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success rounded-circle me-2" style="width:10px; height:10px;"></div>
+                                        <span>@b.Photographer?.FullName</span>
+                                        @if(b.CommissionAmount.HasValue)
+                                        {
+                                            <span class="ms-2 badge bg-success bg-opacity-10 text-success">@b.CommissionAmount.Value.ToString("N0")đ (20%)</span>
+                                        }
+                                    </div>
+
+                                    @if (b.Status == PhoStudioMVC.Models.Enums.BookingStatus.ShootCompleted)
+                                    {
+                                        <form asp-controller="Admin" asp-action="ConfirmCashPayment" asp-route-id="@b.Id" method="post" class="mt-2">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-cash-coin me-1"></i>Xác nhận thu tiền mặt
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                                else
+                                {
+                                    @if(b.Status != PhoStudioMVC.Models.Enums.BookingStatus.Cancelled)
+                                    {
+                                        <form asp-controller="Admin" asp-action="AssignPhotographer" method="post" class="d-flex align-items-center">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="bookingId" value="@b.Id" />
+                                            <select name="photographerId" class="form-select form-select-sm me-2" required>
+                                                <option value="">-- Chọn Thợ --</option>
+                                                @if (ViewBag.Photographers != null)
+                                                {
+                                                    foreach (var p in (IEnumerable<PhoStudioMVC.Models.Entities.ApplicationUser>)ViewBag.Photographers)
+                                                    {
+                                                        <option value="@p.Id">@p.FullName</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-premium">Phân công</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"><i class="bi bi-x"></i> Không khả dụng</span>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                    Xem giao dịch
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="collapse" id="@collapseId">
+                            <td colspan="6" style="background:var(--bg-secondary);">
+                                <div class="p-3 row">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-3" style="color:var(--text-dark);"><i class="bi bi-clock-history me-2" style="color:var(--accent);"></i>Lịch sử thanh toán</h6>
+                                        @if (b.Transactions == null || !b.Transactions.Any(t => t.Status == PhoStudioMVC.Models.Enums.PaymentStatus.Success))
+                                        {
+                                            <p class="text-muted mb-0">Chưa có giao dịch thành công.</p>
+                                        }
+                                        else
+                                        {
+                                            <ul class="list-group">
+                                                @foreach (var tx in b.Transactions.Where(t => t.Status == PhoStudioMVC.Models.Enums.PaymentStatus.Success).OrderBy(t => t.CompletedAt ?? t.CreatedAt))
+                                                {
+                                                    <li class="list-group-item d-flex justify-content-between" style="background:var(--bg-card);border-color:var(--border-light);color:var(--text-body);">
+                                                        <span>
+                                                            @(tx.PaymentType == PhoStudioMVC.Models.Enums.PaymentType.OnlineDeposit ? "OnlineDeposit" : "CashRemainder")
+                                                        </span>
+                                                        <span>
+                                                            @tx.Amount.ToString("N0")đ -
+                                                            @((tx.CompletedAt ?? tx.CreatedAt).ToString("dd/MM/yyyy HH:mm"))
+                                                        </span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 border-start" style="border-color:var(--border-light)!important;">
+                                        <h6 class="mb-3" style="color:var(--text-dark);"><i class="bi bi-cloud-arrow-up me-2" style="color:var(--accent);"></i>Thông tin Cloud Album</h6>
+                                        @if (b.CloudAlbum != null)
+                                        {
+                                            <ul class="list-group">
+                                                <li class="list-group-item d-flex justify-content-between" style="background:var(--bg-card);border-color:var(--border-light);color:var(--text-body);">
+                                                    <span>Mã quản lý (OTP):</span>
+                                                    <strong style="color:var(--accent);font-size:1.1rem;letter-spacing:2px;">@b.CloudAlbum.SecureOTP</strong>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between" style="background:var(--bg-card);border-color:var(--border-light);color:var(--text-body);">
+                                                    <span>Ngày bàn giao:</span>
+                                                    <span>@b.CloudAlbum.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between" style="background:var(--bg-card);border-color:var(--border-light);color:var(--text-body);">
+                                                    <span>Tra cứu Client:</span>
+                                                    <a href="/Client/ViewAlbum?bookingId=@b.Id" target="_blank" style="color:var(--info);">Mở giao diện</a>
+                                                </li>
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted mb-0">Chưa bàn giao album.</p>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+}
+@if (totalPages > 1)
+{
+    <nav aria-label="Bookings pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            @for (int p = 1; p <= totalPages; p++)
+            {
+                <li class="page-item @(p == currentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Bookings" asp-route-page="@p">@p</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

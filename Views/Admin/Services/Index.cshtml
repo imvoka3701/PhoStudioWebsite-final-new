@@ -1,0 +1,62 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.Entities.ServicePackage>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý dịch vụ";
+}
+
+<div class="admin-page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1>Quản lý gói dịch vụ</h1>
+        <p>Thêm, sửa và quản lý các gói chụp ảnh.</p>
+    </div>
+    <a asp-controller="Admin" asp-action="ServiceCreate" class="btn btn-premium">
+        <i class="bi bi-plus-lg me-1"></i>Thêm gói mới
+    </a>
+</div>
+
+<div class="dash-card">
+    <div class="table-responsive">
+        <table class="table table-premium align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên gói</th>
+                    <th>Giá</th>
+                    <th>Thời lượng</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var svc in Model)
+                {
+                    <tr class="@(svc.IsActive ? "" : "opacity-75")">
+                        <td>#@svc.Id</td>
+                        <td>@svc.Name</td>
+                        <td>@svc.Price.ToString("N0")đ</td>
+                        <td>@svc.DurationMinutes phút</td>
+                        <td>
+                            @if (svc.IsActive) { <span class="badge bg-success">Hoạt động</span> }
+                            else { <span class="badge bg-secondary">Đã ẩn</span> }
+                        </td>
+                        <td class="text-end">
+                            <a asp-controller="Admin" asp-action="ServiceEdit" asp-route-id="@svc.Id" class="btn btn-sm btn-outline-info">Sửa</a>
+                            <form asp-controller="Admin" asp-action="DeleteService" asp-route-id="@svc.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn chắc chắn muốn xóa/ẩn gói này?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger">Xóa/Ẩn</button>
+                            </form>
+                            @if (!svc.IsActive)
+                            {
+                                <form asp-controller="Admin" asp-action="RestoreService" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@svc.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-success">Khôi phục</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

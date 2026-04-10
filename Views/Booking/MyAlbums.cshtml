@@ -1,0 +1,81 @@
+﻿@* This view is no longer used directly — MyAlbums redirects to Client/Dashboard *@
+@* Kept as fallback for BookingController.MyAlbums route *@
+@model IEnumerable<PhoStudioMVC.Models.Entities.Booking>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Album Của Tôi";
+    var vnNow = PhoStudioMVC.Helpers.AppTime.VnNow;
+}
+
+@section Styles {
+<style>
+    .albums-header { padding:120px 0 56px; background:linear-gradient(160deg,#1a1208 0%,#2d1f0a 60%,#1a1208 100%); border-bottom:1px solid rgba(203,163,92,.2); }
+    .album-card { background:#fff; border:1px solid #EDE8DF; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(43,43,43,.07); transition:transform .3s ease,box-shadow .3s ease; }
+    .album-card:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(43,43,43,.12); }
+    .album-card-body { padding:20px; background:#FAF7F2; }
+    .btn-otp { background:#CBA35C; color:#fff; border:none; border-radius:8px; padding:9px 18px; font-weight:600; font-size:.88rem; width:100%; transition:all .3s ease; text-decoration:none; display:block; text-align:center; }
+    .btn-otp:hover { background:#B8941F; color:#fff; }
+    .btn-disabled { background:#FAF7F2; color:#6B6B6B; border:1px solid #EDE8DF; border-radius:8px; padding:9px 18px; font-size:.88rem; width:100%; text-align:center; cursor:not-allowed; display:block; }
+</style>
+}
+
+<header class="albums-header">
+    <div class="container">
+        <h1 class="text-white mb-2" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;">Album của tôi</h1>
+        <p class="text-muted" style="font-weight:300;">Theo dõi trạng thái bàn giao ảnh của bạn.</p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:48px 0;min-height:60vh;">
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5" style="background:#fff;border:1.5px dashed #EDE8DF;border-radius:12px;">
+                <i class="bi bi-images mb-3 d-block" style="font-size:3rem;color:#EDE8DF;"></i>
+                <h5 style="font-family:'Playfair Display',serif;color:#2B2B2B;">Bạn chưa có lịch hẹn nào</h5>
+                <p style="color:#6B6B6B;margin-bottom:20px;">Đặt lịch chụp để bắt đầu hành trình nhiếp ảnh!</p>
+                <a href="/Booking/Packages" class="btn-otp" style="display:inline-block;width:auto;padding:10px 28px;">Đặt lịch ngay</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var booking in Model)
+                {
+                    var album = booking.CloudAlbum;
+                    var isExpired = album != null && album.ExpiryDate <= vnNow;
+                    <div class="col-md-6 col-lg-4">
+                        <div class="album-card">
+                            <div class="album-card-body">
+                                <h5 style="font-family:'Playfair Display',serif;color:#2B2B2B;margin-bottom:4px;">
+                                    <i class="bi bi-folder-fill me-2" style="color:#CBA35C;"></i>@(booking.ServicePackage?.Name ?? "Album")
+                                </h5>
+                                <p style="color:#6B6B6B;font-size:.82rem;margin-bottom:12px;">📅 @booking.BookingDate.ToString("dd/MM/yyyy")</p>
+                                @if (album == null)
+                                {
+                                    <span class="btn-disabled"><i class="bi bi-hourglass-split me-1"></i>Đang chờ bàn giao</span>
+                                }
+                                else if (isExpired)
+                                {
+                                    <span class="btn-disabled" style="color:#EF4444;border-color:rgba(239,68,68,.3);"><i class="bi bi-lock me-1"></i>Hết hạn</span>
+                                }
+                                else if (album.IsVerifiedByClient)
+                                {
+                                    <a asp-controller="Client" asp-action="AlbumContent" asp-route-bookingId="@booking.Id" class="btn-otp">
+                                        <i class="bi bi-images me-1"></i>Xem Album
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Client" asp-action="ViewAlbum" asp-route-bookingId="@booking.Id" class="btn-otp">
+                                        <i class="bi bi-shield-lock me-1"></i>Nhận Ảnh (OTP)
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

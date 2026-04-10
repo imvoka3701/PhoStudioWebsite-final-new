@@ -1,0 +1,321 @@
+﻿@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Đăng Nhập";
+}
+
+@section Styles {
+    <style>
+        body {
+            background: url('/assets/img/hero/login.jpg') center/cover no-repeat fixed;
+            min-height: 100vh;
+        }
+
+        /* Overlay để card đọc được trên ảnh */
+        .auth-wrapper::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(245,239,230,0.45);
+            backdrop-filter: blur(2px);
+            z-index: 0;
+        }
+
+        .auth-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-card {
+            position: relative;
+            z-index: 2;
+        }
+
+        #auth-title { color: #2B2B2B; font-family: 'Playfair Display', serif; }
+        #auth-subtitle { color: #6B6B6B; }
+
+        .form-check-label { color: #4A4A4A; }
+        .text-muted { color: #6B6B6B !important; }
+
+        /* Gold submit button */
+        .btn-premium-solid {
+            background: linear-gradient(135deg, #CBA35C, #d4af7a);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            transition: all .3s ease;
+        }
+        .btn-premium-solid:hover {
+            background: linear-gradient(135deg, #B8941F, #CBA35C);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(203,163,92,.4);
+        }
+
+        .btn-premium {
+            background: #CBA35C;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all .3s ease;
+        }
+        .btn-premium:hover {
+            background: #B8941F;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Password strength bar */
+        .password-strength .progress { background: #EDE8DF; }
+    </style>
+}
+
+<div class="auth-wrapper justify-content-center">
+    <div class="auth-card text-center" data-aos="zoom-in" data-aos-duration="600">
+
+        <h2 id="auth-title" class="mb-3 letter-spacing-1" style="font-family:'Playfair Display',serif;color:#2B2B2B;font-size:1.6rem;font-weight:700;">PHỐ STUDIO</h2>
+        <p id="auth-subtitle" class="mb-5" style="color:#6B6B6B;font-weight:300;font-size:1rem;">Đăng nhập vào
+            tài khoản của bạn.</p>
+
+        <!-- LOGIN VIEW -->
+        <div id="login-view">
+            <form asp-controller="Account" asp-action="Login" method="post" id="login-form" class="text-start needs-validation" novalidate>
+                @Html.AntiForgeryToken()
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success small mb-4 py-2 text-center">
+                        <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger small mb-4 py-2 text-center">
+                        <i class="bi bi-exclamation-circle me-1"></i> @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="form-floating custom-float mb-4">
+                    <input type="email" class="form-control" id="username" name="username" placeholder="Email" required>
+                    <label for="username">Email</label>
+                    <div class="invalid-feedback text-danger small mt-1">Vui lòng nhập email.</div>
+                </div>
+
+                <div class="form-floating custom-float mb-4">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+                    <label for="password">Mật khẩu</label>
+                    <div class="invalid-feedback text-danger small mt-1">Vui lòng nhập mật khẩu.</div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="true" id="rememberMe" name="rememberMe">
+                        <label class="form-check-label text-muted small" for="rememberMe">
+                            Ghi nhớ đăng nhập
+                        </label>
+                    </div>
+                    <a href="#" class="text-accent small text-decoration-none hover-white">Quên mật khẩu?</a>
+                </div>
+
+                <button type="submit" class="btn btn-premium-solid w-100 py-3 d-flex justify-content-center align-items-center">
+                    ĐĂNG NHẬP <i class="bi bi-box-arrow-in-right ms-2 fs-5"></i>
+                </button>
+            </form>
+
+            <p class="text-muted small mt-4">Chưa có tài khoản? <a href="javascript:void(0)"
+                    onclick="toggleView('register-view')" class="text-accent text-decoration-none">Đăng ký.</a></p>
+            <p class="text-muted small mt-2">Chưa có tài khoản chụp? <a asp-controller="Booking" asp-action="Index"
+                    class="text-accent text-decoration-none">Đặt lịch trước.</a></p>
+        </div>
+
+        <!-- REGISTER VIEW -->
+        <div id="register-view" class="d-none">
+            <form asp-controller="Account" asp-action="Register" method="post" id="register-form" class="text-start needs-validation" novalidate>
+                @Html.AntiForgeryToken()
+
+                @if (TempData["RegisterError"] != null)
+                {
+                    <div class="alert alert-danger small mb-4 py-2 text-center" id="register-error-server">
+                        <i class="bi bi-exclamation-circle me-1"></i> @TempData["RegisterError"]
+                    </div>
+                    <!-- Auto-switch to register view on error -->
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            toggleView('register-view');
+                        });
+                    </script>
+                }
+
+                <div class="form-floating custom-float mb-4">
+                    <input type="text" class="form-control" id="reg-username" name="username" placeholder="Tên đăng nhập" required>
+                    <label for="reg-username">Tên đăng nhập</label>
+                    <div class="invalid-feedback text-danger small mt-1">Vui lòng nhập tên đăng nhập.</div>
+                </div>
+
+                <div class="form-floating custom-float mb-4">
+                    <input type="text" class="form-control" id="reg-fullname" name="fullName" placeholder="Họ và tên" required>
+                    <label for="reg-fullname">Họ và tên</label>
+                    <div class="invalid-feedback text-danger small mt-1">Vui lòng nhập họ tên.</div>
+                </div>
+
+                <div class="form-floating custom-float mb-4">
+                    <input type="tel" class="form-control" id="reg-phone" name="phone" placeholder="Số điện thoại" required pattern="[0-9]{9,11}">
+                    <label for="reg-phone">Số điện thoại (bắt buộc)</label>
+                    <div class="invalid-feedback text-danger small mt-1">Vui lòng nhập số điện thoại hợp lệ (9-11 số).</div>
+                </div>
+
+                <div class="form-floating custom-float mb-4">
+                    <input type="email" class="form-control" id="reg-email" name="email" placeholder="Email" required>
+                    <label for="reg-email">Email</label>
+                    <div class="invalid-feedback text-danger small mt-1">Vui lòng nhập địa chỉ email hợp lệ.</div>
+                </div>
+
+                <div class="form-floating custom-float mb-4">
+                    <input type="password" class="form-control" id="reg-password" name="password" placeholder="Mật khẩu" required minlength="6">
+                    <label for="reg-password">Mật khẩu</label>
+                    <div class="invalid-feedback text-danger small mt-1">Mật khẩu tối thiểu 6 ký tự.</div>
+                    <div class="password-strength mt-2">
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar" id="password-strength-bar" style="width: 0%;"></div>
+                        </div>
+                        <small class="text-muted" id="password-strength-text"></small>
+                    </div>
+                </div>
+
+                <div class="form-floating custom-float mb-4">
+                    <input type="password" class="form-control" id="reg-confirm-password" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+                    <label for="reg-confirm-password">Xác nhận mật khẩu</label>
+                    <div class="invalid-feedback text-danger small mt-1">Mật khẩu không khớp.</div>
+                    <div class="valid-feedback text-success small mt-1">✓ Mật khẩu khớp</div>
+                </div>
+
+                <button type="submit" class="btn btn-premium w-100 py-3 d-flex justify-content-center align-items-center mt-5">
+                    ĐĂNG KÝ <i class="bi bi-person-plus ms-2 fs-5"></i>
+                </button>
+            </form>
+
+            <p class="text-muted small mt-4">Đã có tài khoản? <a href="javascript:void(0)"
+                    onclick="toggleView('login-view')" class="text-accent text-decoration-none">Đăng nhập.</a></p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleView(viewId) {
+            document.getElementById('login-view').classList.add('d-none');
+            document.getElementById('register-view').classList.add('d-none');
+            document.getElementById(viewId).classList.remove('d-none');
+
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+
+            if (viewId === 'register-view') {
+                subtitle.textContent = "Tạo tài khoản khách hàng mới.";
+            } else {
+                subtitle.textContent = "Đăng nhập vào tài khoản của bạn.";
+            }
+
+            // Adjust mock socials
+            const socials = document.querySelector('.login-options');
+            if (socials) {
+                if (viewId === 'register-view') socials.classList.add('d-none');
+                else socials.classList.remove('d-none');
+            }
+        }
+
+        // Password strength checker
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('reg-password');
+            const confirmPasswordInput = document.getElementById('reg-confirm-password');
+            const strengthBar = document.getElementById('password-strength-bar');
+            const strengthText = document.getElementById('password-strength-text');
+
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    let strength = 0;
+                    let feedback = '';
+
+                    if (password.length >= 6) strength++;
+                    if (password.length >= 10) strength++;
+                    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+                    if (/\d/.test(password)) strength++;
+                    if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+                    const strengthLevels = [
+                        { width: '0%', color: 'bg-danger', text: '' },
+                        { width: '25%', color: 'bg-danger', text: 'Yếu' },
+                        { width: '50%', color: 'bg-warning', text: 'Trung bình' },
+                        { width: '75%', color: 'bg-info', text: 'Khá' },
+                        { width: '100%', color: 'bg-success', text: 'Mạnh' }
+                    ];
+
+                    const level = strengthLevels[strength];
+                    strengthBar.style.width = level.width;
+                    strengthBar.className = 'progress-bar ' + level.color;
+                    strengthText.textContent = level.text;
+                    strengthText.className = level.text ? 'text-muted small' : '';
+                });
+            }
+
+            // Real-time password confirmation validation
+            if (confirmPasswordInput && passwordInput) {
+                confirmPasswordInput.addEventListener('input', function() {
+                    const confirmPassword = this.value;
+                    const password = passwordInput.value;
+                    const feedback = this.nextElementSibling;
+
+                    if (confirmPassword && password) {
+                        if (confirmPassword === password) {
+                            this.classList.remove('is-invalid');
+                            this.classList.add('is-valid');
+                            feedback.style.display = 'block';
+                        } else {
+                            this.classList.remove('is-valid');
+                            this.classList.add('is-invalid');
+                            feedback.style.display = 'none';
+                        }
+                    } else {
+                        this.classList.remove('is-valid', 'is-invalid');
+                        feedback.style.display = 'none';
+                    }
+                });
+            }
+
+            // Enhanced form validation
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (!form.checkValidity()) {
+                        form.classList.add('was-validated');
+                        
+                        // Smooth scroll to first invalid field
+                        const firstInvalid = form.querySelector(':invalid');
+                        if (firstInvalid) {
+                            firstInvalid.focus();
+                            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    } else {
+                        // Show loading state
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Đang xử lý...';
+                        submitBtn.disabled = true;
+
+                        // Submit form after a short delay for UX
+                        setTimeout(() => {
+                            form.submit();
+                        }, 500);
+                    }
+                }, false);
+            });
+        });
+    </script>
+}

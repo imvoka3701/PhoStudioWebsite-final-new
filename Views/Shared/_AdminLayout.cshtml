@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - Quản trị viên</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/assets/css/admin-light-theme.css">
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+    <!-- Cinematic Loader -->
+    <div id="loader" class="loader-screen">
+        <div class="loader-logo">PHỐ</div>
+    </div>
+
+    <!-- Custom Interaction Cursor -->
+    <div class="custom-cursor"></div>
+
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar" id="sidebar">
+            <a asp-controller="Home" asp-action="Index" class="sidebar-brand">PHỐ ADMIN</a>
+            
+            <div class="text-center mb-4 pb-4" style="border-bottom: 1px solid #E5E5E5;">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=c9a96e&color=fff" class="rounded-circle mb-2" width="60" alt="Admin">
+                <p class="text-dark mb-0" style="font-size: 0.95rem; font-weight: 500;">Quản trị Hệ thống</p>
+            </div>
+
+            @{
+                var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+                var action = ViewContext.RouteData.Values["action"]?.ToString();
+            }
+
+            <nav class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @(ctrl == "Admin" && action == "Index" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Index">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @(ctrl == "Admin" && action == "Services" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Services">
+                        <i class="bi bi-tags"></i>
+                        <span>Gói dịch vụ</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @(ctrl == "Admin" && action == "Bookings" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Bookings">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Đặt lịch</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @(ctrl == "Admin" && action == "HR" ? "active" : "")"
+                       asp-controller="Admin" asp-action="HR">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Nhân sự</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @(ctrl == "Admin" && action == "PaymentHistory" ? "active" : "")"
+                       asp-controller="Admin" asp-action="PaymentHistory">
+                        <i class="bi bi-credit-card"></i>
+                        <span>Lịch sử TT</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @(ctrl == "Admin" && action == "RetouchRequests" ? "active" : "")"
+                       asp-controller="Admin" asp-action="RetouchRequests">
+                        <i class="bi bi-brush"></i>
+                        <span>Yêu cầu Retouch</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @(ctrl == "Admin" && action == "SelectedPhotos" ? "active" : "")"
+                       asp-controller="Admin" asp-action="SelectedPhotos">
+                        <i class="bi bi-heart"></i>
+                        <span>Ảnh khách chọn</span>
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a class="sidebar-nav-link @(ctrl == "Admin" && action == "AuditAccounts" ? "active" : "")"
+                       asp-controller="Admin" asp-action="AuditAccounts">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Kiểm toán TK</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-nav-item" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #E5E5E5;">
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="w-100">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="sidebar-nav-link w-100 border-0 text-start" style="color: #EF4444;">
+                            <i class="bi bi-box-arrow-left"></i>
+                            <span>Đăng Xuất</span>
+                        </button>
+                    </form>
+                </li>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <!-- Mobile Toggle Header -->
+            <div class="d-md-none d-flex justify-content-between align-items-center mb-4 pb-3" style="border-bottom: 1px solid #E5E5E5;">
+                <h4 class="mb-0" style="color: #CBA35C; font-weight: 700;">PHỐ ADMIN</h4>
+                <button class="btn btn-outline-secondary" onclick="document.getElementById('sidebar').classList.toggle('show')" style="border-color: #E5E5E5; color: #1F1F1F;">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+            </div>
+
+            @if (TempData["Success"] is string s)
+            {
+                <div class="alert alert-success alert-dismissible fade show mb-4" style="background: rgba(34, 197, 94, 0.1); border: 1px solid #22C55E; color: #16A34A;">
+                    <i class="bi bi-check-circle-fill me-2"></i>@s
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" style="filter: invert(0.3);"></button>
+                </div>
+            }
+            @if (TempData["Error"] is string e)
+            {
+                <div class="alert alert-danger alert-dismissible fade show mb-4" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #EF4444; color: #DC2626;">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@e
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" style="filter: invert(0.3);"></button>
+                </div>
+            }
+            @if (TempData["Warning"] is string w)
+            {
+                <div class="alert alert-warning alert-dismissible fade show mb-4" style="background: rgba(245, 158, 11, 0.1); border: 1px solid #F59E0B; color: #D97706;">
+                    <i class="bi bi-info-circle-fill me-2"></i>@w
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" style="filter: invert(0.3);"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/assets/js/main.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

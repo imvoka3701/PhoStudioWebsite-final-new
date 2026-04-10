@@ -1,0 +1,64 @@
+﻿@model IEnumerable<PhoStudioMVC.Models.ViewModels.SelectedPhotosBookingGroup>
+@{
+    Layout = "_PhotographerLayout";
+    ViewData["Title"] = "Ảnh khách đã chọn";
+}
+
+<div style="background:var(--bg-card);border-bottom:1px solid var(--border-light);padding:28px 32px;margin:-32px -32px 32px -32px;box-shadow:var(--shadow-sm);">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;color:var(--text-dark);margin:0 0 4px 0;">
+        Ảnh khách đã chọn
+    </h1>
+    <p style="color:var(--text-muted);font-size:0.9rem;margin:0;">Các ảnh khách tim theo từng booking bạn phụ trách.</p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="dash-card text-center py-5" style="color:var(--text-muted);">
+        <i class="bi bi-heart fs-1 mb-3 d-block" style="color:var(--border-light);"></i>
+        Chưa có booking nào có ảnh được khách chọn.
+    </div>
+}
+else
+{
+    foreach (var g in Model)
+    {
+        <div class="dash-card mb-4">
+            <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+                <div>
+                    <h5 style="color:var(--text-dark);font-family:'Playfair Display',serif;margin-bottom:4px;">@g.ClientName</h5>
+                    <div style="color:var(--text-muted);font-size:0.85rem;">
+                        Booking: @g.BookingId &nbsp;|&nbsp; Gói: @g.ServiceName &nbsp;|&nbsp; Ngày: @g.BookingDate.ToString("dd/MM/yyyy")
+                    </div>
+                    <div style="color:var(--text-muted);font-size:0.85rem;">SĐT: @g.ClientPhone</div>
+                </div>
+                <span class="badge" style="background:var(--danger-bg);color:var(--danger);font-size:0.85rem;padding:8px 14px;">❤ @g.FavoriteCount ảnh</span>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(g.LatestRequestNote))
+            {
+                <div class="mb-3 p-3 rounded" style="background:var(--accent-lighter);border-left:3px solid var(--accent);">
+                    <strong style="color:var(--accent);font-size:0.85rem;">Yêu cầu khách:</strong>
+                    <span style="color:var(--text-body);font-size:0.88rem;"> @g.LatestRequestNote</span>
+                    @if (g.LatestRequestAt.HasValue)
+                    {
+                        <span style="color:var(--text-muted);font-size:0.8rem;"> (@g.LatestRequestAt.Value.ToString("dd/MM HH:mm"))</span>
+                    }
+                </div>
+            }
+
+            <div class="row g-3">
+                @foreach (var p in g.Photos)
+                {
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <a href="@p.RelativePath" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                            <div style="border:1px solid var(--border-light);border-radius:8px;overflow:hidden;transition:transform .25s ease;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+                                <img src="@p.RelativePath" alt="@p.FileName" style="width:100%;height:130px;object-fit:cover;" />
+                            </div>
+                            <div style="color:var(--text-muted);font-size:0.78rem;margin-top:4px;" class="text-truncate">@p.FileName</div>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}

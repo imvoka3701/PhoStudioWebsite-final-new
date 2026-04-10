@@ -1,0 +1,162 @@
+﻿@model PhoStudioMVC.Models.Entities.Booking
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Thanh Toán Cọc";
+}
+
+@section Styles {
+<style>
+    .payment-header { padding: 100px 0 48px; background: linear-gradient(160deg, #1a1208 0%, #2d1f0a 60%, #1a1208 100%); border-bottom: 1px solid rgba(203,163,92,0.2); text-align: center; }
+    .payment-card { background: #fff; border: 1px solid #EDE8DF; border-radius: 16px; padding: 36px; max-width: 660px; margin: 0 auto; box-shadow: 0 4px 24px rgba(43,43,43,0.09); }
+    .payment-section-title { font-family: 'Playfair Display', serif; color: #2B2B2B; font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .info-block { background: #FAF7F2; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
+    .info-row { display: flex; justify-content: space-between; padding: 5px 0; }
+    .info-label { color: #6B6B6B; font-size: 0.88rem; }
+    .info-value { color: #2B2B2B; font-weight: 600; font-size: 0.9rem; }
+    .coupon-section { background: rgba(203,163,92,0.06); border: 1px solid rgba(203,163,92,0.25); border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; }
+    .coupon-input { flex: 1; background: #fff; border: 1.5px solid #EDE8DF; border-radius: 8px; padding: 10px 14px; color: #2B2B2B; font-weight: 600; letter-spacing: 1px; transition: border-color .25s ease; }
+    .coupon-input:focus { outline: none; border-color: #CBA35C; box-shadow: 0 0 0 3px rgba(203,163,92,0.12); }
+    .coupon-btn { background: #CBA35C; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.25s ease; }
+    .coupon-btn:hover { background: #B8941F; transform: translateY(-1px); }
+    .summary-block { background: #FAF7F2; border-radius: 10px; padding: 18px 20px; margin: 20px 0; }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; }
+    .summary-label { color: #6B6B6B; font-size: 0.9rem; }
+    .summary-value { font-weight: 700; color: #2B2B2B; }
+    .summary-divider { border-top: 1px solid #EDE8DF; margin: 10px 0; }
+    .summary-total { font-size: 1.15rem; color: #CBA35C; }
+    .bank-info { background: #FAF7F2; border: 1px solid #EDE8DF; border-radius: 10px; padding: 18px; }
+    .bank-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.88rem; }
+    .bank-label { color: #6B6B6B; }
+    .bank-value { color: #2B2B2B; font-weight: 600; }
+    .qr-image { width: 220px; height: 220px; object-fit: contain; background: white; padding: 8px; border-radius: 10px; box-shadow: 0 4px 12px rgba(43,43,43,0.1); }
+    .btn-pay { background: #CBA35C; color: #fff; border: none; border-radius: 10px; padding: 14px; font-weight: 700; font-size: 1rem; width: 100%; transition: all 0.3s ease; cursor: pointer; }
+    .btn-pay:hover { background: #B8941F; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(203,163,92,0.35); }
+    .btn-cancel-pay { display: block; text-align: center; margin-top: 12px; color: #6B6B6B; font-size: 0.9rem; text-decoration: none; transition: color .25s ease; }
+    .btn-cancel-pay:hover { color: #EF4444; }
+</style>
+}
+
+<header class="payment-header">
+    <div class="container" data-aos="fade-up">
+        <p style="color:#CBA35C;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">BƯỚC CUỐI CÙNG</p>
+        <h1 class="text-white" style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;margin-bottom:12px;">Thanh Toán</h1>
+        <p class="text-muted" style="font-weight:300;font-size:1.05rem;">Khung giờ của bạn đang được giữ tạm thời. Vui lòng hoàn tất thanh toán cọc.</p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:48px 0;">
+    <div class="container">
+        <div class="payment-card" data-aos="fade-up">
+
+            <h4 class="payment-section-title"><i class="bi bi-qr-code-scan" style="color:#CBA35C;"></i>Thanh Toán Cọc</h4>
+
+            <div class="info-block">
+                <div class="info-row">
+                    <span class="info-label">Mã lịch hẹn</span>
+                    <span class="info-value">#@Model.Id.Substring(0,8).ToUpper()</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ngày chụp</span>
+                    <span class="info-value">@Model.BookingDate.ToString("dd/MM/yyyy") - @Model.StartTime.ToString(@"hh\:mm")</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Gói dịch vụ</span>
+                    <span class="info-value">@Model.ServicePackage?.Name</span>
+                </div>
+            </div>
+
+            <div class="coupon-section">
+                <label style="color:#CBA35C;font-weight:700;font-size:0.9rem;display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+                    <i class="bi bi-ticket-perforated"></i>Có Mã Giảm Giá?
+                </label>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" class="coupon-input" id="couponCode" placeholder="Nhập mã giảm giá..." maxlength="50">
+                    <button type="button" class="coupon-btn" onclick="applyCoupon()">Áp Dụng</button>
+                </div>
+            </div>
+
+            <div class="summary-block">
+                <div class="summary-row">
+                    <span class="summary-label">Giá Gói</span>
+                    <span class="summary-value">@Model.TotalAmount.ToString("N0")đ</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Cọc 30%</span>
+                    <span class="summary-value">@Model.DepositAmount.ToString("N0")đ</span>
+                </div>
+                <div class="summary-row discount" style="display:none;" id="discountRow">
+                    <span class="summary-label">Giảm Giá</span>
+                    <span class="summary-value" id="discountAmount" style="color:#22C55E;">-0đ</span>
+                </div>
+                <div class="summary-divider"></div>
+                <div class="summary-row summary-total">
+                    <span style="font-weight:700;">Cần Thanh Toán</span>
+                    <span id="finalAmount" style="font-weight:700;color:#CBA35C;">@Model.DepositAmount.ToString("N0")đ</span>
+                </div>
+            </div>
+
+            <p style="color:#6B6B6B;font-size:0.88rem;margin-bottom:16px;">
+                ⏳ Thời gian giữ chỗ còn lại: <span style="color:#F59E0B;font-weight:700;font-size:1.1rem;" id="lock-timer">00:00</span>
+            </p>
+
+            <div class="alert alert-warning small mb-4" style="border-radius:10px;background:rgba(245,158,11,0.08);border-color:#F59E0B;color:#92400E;">
+                <i class="bi bi-info-circle me-2"></i>Vui lòng thanh toán cọc <strong>30% (@Model.DepositAmount.ToString("N0")đ)</strong> để hoàn tất việc giữ chỗ.
+            </div>
+
+            <div class="row g-4 align-items-center mb-4">
+                <div class="col-md-5 text-center">
+                    <img src="~/assets/img/qr-transfer.jpg?v=@DateTime.Now.Ticks" alt="Mã QR thanh toán" class="qr-image mb-2">
+                    <p style="color:#CBA35C;font-size:0.82rem;"><i class="bi bi-camera-fill me-1"></i>Quét mã để thanh toán</p>
+                </div>
+                <div class="col-md-7">
+                    <div class="bank-info">
+                        <h6 style="color:#2B2B2B;font-weight:600;margin-bottom:12px;">Thông Tin Chuyển Khoản</h6>
+                        <div class="bank-row"><span class="bank-label">Ngân hàng</span><span class="bank-value">MB BANK</span></div>
+                        <div class="bank-row"><span class="bank-label">Số tài khoản</span><span class="bank-value">123456789</span></div>
+                        <div class="bank-row"><span class="bank-label">Chủ tài khoản</span><span class="bank-value">PHO STUDIO</span></div>
+                        <div class="bank-row"><span class="bank-label">Nội dung</span><span class="bank-value" style="color:#CBA35C;">BOOKING @Model.Id.Substring(0, 8).ToUpper()</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <p style="color:#6B6B6B;font-size:0.85rem;text-align:center;margin-bottom:20px;">
+                Quét mã QR hoặc chuyển khoản qua thông tin trên.<br>Bấm <strong>"Đã Chuyển Khoản"</strong> bên dưới để hoàn tất.
+            </p>
+
+            <form asp-action="ConfirmPayment" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="bookingId" value="@Model.Id" />
+                <input type="hidden" name="couponCode" id="appliedCouponCode" />
+                <button type="submit" class="btn-pay"><i class="bi bi-check-circle me-2"></i>Đã Chuyển Khoản</button>
+            </form>
+            <a asp-controller="Booking" asp-action="Index" class="btn-cancel-pay">Hủy Giao Dịch</a>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    const depositAmount = @Model.DepositAmount;
+    function applyCoupon() {
+        const code = document.getElementById('couponCode').value.trim().toUpperCase();
+        if (!code) { alert('Vui lòng nhập mã giảm giá'); return; }
+        const discounts = { 'SPRING20': 0.2, 'WELCOME10': 0.1 };
+        if (discounts[code]) {
+            const disc = depositAmount * discounts[code];
+            document.getElementById('discountRow').style.display = 'flex';
+            document.getElementById('discountAmount').textContent = `-${Math.round(disc).toLocaleString('vi-VN')}đ`;
+            document.getElementById('finalAmount').textContent = `${Math.round(depositAmount - disc).toLocaleString('vi-VN')}đ`;
+            document.getElementById('appliedCouponCode').value = code;
+            alert(`✓ Áp dụng mã ${code} thành công!`);
+        } else { alert('Mã giảm giá không hợp lệ'); }
+    }
+    const expirationTime = new Date('@Model.LockExpirationTime?.ToString("o")').getTime();
+    const timerEl = document.getElementById('lock-timer');
+    const timerInterval = setInterval(() => {
+        const dist = expirationTime - Date.now();
+        if (dist < 0) { clearInterval(timerInterval); timerEl.textContent = 'HẾT HẠN'; timerEl.style.color = '#EF4444'; window.location.reload(); return; }
+        const m = Math.floor((dist % 3600000) / 60000), s = Math.floor((dist % 60000) / 1000);
+        timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+</script>
+}

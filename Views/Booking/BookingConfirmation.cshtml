@@ -1,0 +1,121 @@
+﻿@model PhoStudioMVC.Models.Entities.Booking
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Xác nhận đặt lịch";
+}
+
+@section Styles {
+<style>
+    .confirm-header {
+        padding: 140px 0 72px;
+        background: linear-gradient(160deg, #1a1208 0%, #2d1f0a 60%, #1a1208 100%);
+        border-bottom: 1px solid rgba(203,163,92,0.2);
+        text-align: center;
+    }
+    .confirm-card {
+        background: #FFFFFF;
+        border: 1px solid #EDE8DF;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 4px 24px rgba(43,43,43,0.09);
+        max-width: 640px;
+        margin: 0 auto;
+    }
+    .confirm-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #F5EFE6;
+        font-size: 0.93rem;
+    }
+    .confirm-row:last-child { border: none; }
+    .confirm-label { color: #6B6B6B; font-weight: 500; }
+    .confirm-value { color: #1A1A1A; font-weight: 600; }
+    .btn-confirm-primary {
+        background: #CBA35C;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 28px;
+        font-weight: 700;
+        font-size: 0.93rem;
+        text-decoration: none;
+        transition: all .3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-confirm-primary:hover { background: #B8941F; color: #fff; transform: translateY(-2px); }
+    .btn-confirm-secondary {
+        background: transparent;
+        color: #4A4A4A;
+        border: 1.5px solid #EDE8DF;
+        border-radius: 8px;
+        padding: 11px 24px;
+        font-weight: 600;
+        font-size: 0.93rem;
+        text-decoration: none;
+        transition: all .25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-confirm-secondary:hover { border-color: #CBA35C; color: #CBA35C; }
+</style>
+}
+
+<header class="confirm-header">
+    <div class="container" data-aos="fade-up">
+        <h5 style="color:#E8C47A !important;font-size:.82rem;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px;text-shadow:0 1px 6px rgba(0,0,0,0.5);">ĐẶT LỊCH THÀNH CÔNG</h5>
+        <h1 style="font-family:'Playfair Display',serif !important;font-size:clamp(2.2rem,4vw,3rem) !important;font-weight:700 !important;color:#FFFFFF !important;text-transform:none !important;letter-spacing:0 !important;margin-bottom:12px;text-shadow:0 3px 16px rgba(0,0,0,0.55);">Xác Nhận Đặt Lịch</h1>
+        <p style="color:rgba(255,255,255,0.88) !important;font-weight:300;font-size:1rem;text-shadow:0 1px 8px rgba(0,0,0,0.4);">Lịch hẹn của bạn đã được xác nhận. Vui lòng kiểm tra thông tin bên dưới.</p>
+    </div>
+</header>
+
+<section style="background:#F5EFE6;padding:56px 0;min-height:40vh;">
+    <div class="container">
+        <div class="confirm-card" data-aos="fade-up">
+
+            <!-- Success badge -->
+            <div class="text-center mb-4">
+                <div style="width:64px;height:64px;border-radius:50%;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                    <i class="bi bi-check-circle-fill fs-2" style="color:#22C55E;"></i>
+                </div>
+                <h4 style="font-family:'Playfair Display',serif;color:#1A1A1A;font-weight:700;margin-bottom:4px;">Đặt lịch thành công!</h4>
+                <p style="color:#6B6B6B;font-size:0.9rem;margin:0;">
+                    Mã đặt lịch: <strong style="color:#CBA35C;font-size:1rem;letter-spacing:1px;">#@Model.Id[..8].ToUpper()</strong>
+                </p>
+            </div>
+
+            <!-- Booking details -->
+            <div style="background:#FAF7F2;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+                <div class="confirm-row">
+                    <span class="confirm-label"><i class="bi bi-box me-2" style="color:#CBA35C;"></i>Gói dịch vụ</span>
+                    <span class="confirm-value">@Model.ServicePackage?.Name</span>
+                </div>
+                <div class="confirm-row">
+                    <span class="confirm-label"><i class="bi bi-calendar3 me-2" style="color:#CBA35C;"></i>Ngày chụp</span>
+                    <span class="confirm-value">@Model.BookingDate.ToString("dd/MM/yyyy")</span>
+                </div>
+                <div class="confirm-row">
+                    <span class="confirm-label"><i class="bi bi-clock me-2" style="color:#CBA35C;"></i>Khung giờ</span>
+                    <span class="confirm-value">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</span>
+                </div>
+                <div class="confirm-row">
+                    <span class="confirm-label"><i class="bi bi-cash-coin me-2" style="color:#CBA35C;"></i>Tiền cọc đã trả</span>
+                    <span class="confirm-value" style="color:#22C55E;">@Model.DepositAmount.ToString("N0")đ</span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 flex-wrap">
+                <a asp-action="MyBookings" class="btn-confirm-primary">
+                    <i class="bi bi-calendar-check"></i>Xem lịch của tôi
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn-confirm-secondary">
+                    <i class="bi bi-house"></i>Về trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

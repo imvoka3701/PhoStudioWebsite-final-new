@@ -1,0 +1,249 @@
+﻿@model PhoStudioMVC.Models.Entities.Booking
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Album của tôi";
+    var favoriteCount = Model.AlbumAssets?.Count(a => a.IsFavorite) ?? 0;
+    var orderedAssets = (Model.AlbumAssets ?? new List<PhoStudioMVC.Models.Entities.AlbumAsset>())
+        .OrderByDescending(a => a.IsFavorite)
+        .ThenByDescending(a => a.FavoritedAt ?? DateTime.MinValue)
+        .ThenByDescending(a => a.CreatedAt)
+        .ToList();
+
+    var albumUrl = Model.CloudAlbum?.AlbumUrl ?? "";
+    var hasCloudUrl = !string.IsNullOrWhiteSpace(albumUrl);
+
+    // Convert Google Drive folder URL to embeddable URL
+    // https://drive.google.com/drive/folders/FOLDER_ID → https://drive.google.com/embeddedfolderview?id=FOLDER_ID
+    string embedUrl = albumUrl;
+    if (hasCloudUrl && albumUrl.Contains("drive.google.com/drive/folders/"))
+    {
+        var folderId = albumUrl.Split("/folders/").LastOrDefault()?.Split("?").FirstOrDefault() ?? "";
+        if (!string.IsNullOrWhiteSpace(folderId))
+            embedUrl = $"https://drive.google.com/embeddedfolderview?id={folderId}#grid";
+    }
+    else if (hasCloudUrl && albumUrl.Contains("drive.google.com/file/d/"))
+    {
+        var fileId = albumUrl.Split("/d/").LastOrDefault()?.Split("/").FirstOrDefault() ?? "";
+        if (!string.IsNullOrWhiteSpace(fileId))
+            embedUrl = $"https://drive.google.com/file/d/{fileId}/preview";
+    }
+
+    var isGoogleDrive = hasCloudUrl && albumUrl.Contains("drive.google.com");
+    var hasLocalAssets = orderedAssets.Any();
+}
+
+<div class="container py-5" style="margin-top: 150px; min-height: 60vh; background: #F5EFE6;">
+    @if (TempData["OtpSuccess"] is string otpSuccess)
+    {
+        <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 mb-4">
+            <i class="bi bi-shield-check fs-5"></i>
+            <span>@otpSuccess</span>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+        <div>
+            <h2 style="color:#1A1A1A;font-family:'Playfair Display',serif;font-weight:700;margin-bottom:6px;">Album nội bộ</h2>
+            <div style="color:#5A5A5A;font-size:0.88rem;">
+                <span class="me-3"><strong style="color:#2B2B2B;">Gói:</strong> @Model.ServicePackage?.Name</span>
+                <span class="me-3"><strong style="color:#2B2B2B;">Ngày chụp:</strong> @Model.BookingDate.ToString("dd/MM/yyyy")</span>
+                <span><strong style="color:#2B2B2B;">Khung giờ:</strong> @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</span>
+            </div>
+            <div class="mt-2">
+                <span class="badge" style="background:rgba(239,68,68,0.1);color:#DC2626;">❤ Ảnh yêu thích: @favoriteCount</span>
+            </div>
+        </div>
+        <a asp-controller="Client" asp-action="MyAlbums" style="border:1.5px solid #CBA35C;color:#CBA35C;border-radius:8px;padding:8px 18px;text-decoration:none;font-weight:600;font-size:0.88rem;transition:all .25s ease;" onmouseover="this.style.background='#CBA35C';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#CBA35C'">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại My Albums
+        </a>
+    </div>
+
+    <div style="background:#fff;border:1px solid #EDE8DF;border-radius:12px;padding:20px;margin-bottom:24px;box-shadow:0 2px 12px rgba(43,43,43,0.06);">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            @if (hasCloudUrl && !hasLocalAssets)
+            {
+                <div style="color:#6B6B6B;font-size:0.88rem;">
+                    <i class="bi bi-info-circle me-1" style="color:#CBA35C;"></i>
+                    Album này được giao qua Google Drive. Chức năng chọn ảnh yêu thích không khả dụng.
+                </div>
+            }
+            else
+            {
+                <div style="color:#5A5A5A;font-size:0.88rem;">
+                    Chọn ảnh yêu thích bằng nút tim. Sau đó gửi danh sách để studio ưu tiên hậu kỳ/in ảnh.
+                </div>
+                <form id="favorite-submit-form" asp-action="SubmitFavoriteSelection" method="post" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="bookingId" value="@Model.Id" />
+                    <input type="text" name="note" class="form-control form-control-sm" style="min-width:260px;background:#FAF7F2;border:1px solid #EDE8DF;color:#2B2B2B;" placeholder="Ghi chú cho studio (tùy chọn)" />
+                    <button id="submit-favorite-btn" type="submit" class="btn btn-sm btn-premium" @(favoriteCount == 0 ? "disabled" : "")>Gửi ảnh đã chọn</button>
+                </form>
+            }
+        </div>
+    </div>
+
+    @if (Model.AlbumAssets == null || !Model.AlbumAssets.Any())
+    {
+        @if (hasCloudUrl)
+        {
+            <!-- Google Drive / External Cloud Album -->
+            <div style="background:#fff;border:1px solid #EDE8DF;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(43,43,43,0.06);margin-bottom:24px;">
+                <div style="padding:16px 20px;border-bottom:1px solid #EDE8DF;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <i class="bi bi-cloud-fill" style="color:#CBA35C;font-size:1.2rem;"></i>
+                        <span style="font-weight:600;color:#2B2B2B;font-size:0.95rem;">Album Cloud của bạn</span>
+                        @if (isGoogleDrive)
+                        {
+                            <span style="background:rgba(66,133,244,0.1);color:#4285F4;border:1px solid rgba(66,133,244,0.25);border-radius:50px;padding:3px 10px;font-size:0.75rem;font-weight:600;">
+                                <i class="bi bi-google me-1"></i>Google Drive
+                            </span>
+                        }
+                    </div>
+                    <a href="@albumUrl" target="_blank" rel="noopener noreferrer"
+                       style="border:1.5px solid #CBA35C;color:#CBA35C;border-radius:8px;padding:7px 16px;text-decoration:none;font-weight:600;font-size:0.85rem;display:inline-flex;align-items:center;gap:6px;transition:all .25s ease;"
+                       onmouseover="this.style.background='#CBA35C';this.style.color='#fff'"
+                       onmouseout="this.style.background='transparent';this.style.color='#CBA35C'">
+                        <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
+                    </a>
+                </div>
+                @if (isGoogleDrive)
+                {
+                    <iframe src="@embedUrl"
+                            style="width:100%;height:600px;border:none;display:block;"
+                            allow="autoplay"
+                            loading="lazy"
+                            title="Album ảnh của bạn">
+                    </iframe>
+                    <div style="padding:12px 20px;background:#FAF7F2;border-top:1px solid #EDE8DF;font-size:0.82rem;color:#6B6B6B;">
+                        <i class="bi bi-info-circle me-1" style="color:#CBA35C;"></i>
+                        Nếu album không hiển thị, hãy nhấn <strong>"Mở trong tab mới"</strong> để xem trực tiếp trên Google Drive.
+                    </div>
+                }
+                else
+                {
+                    <div style="padding:40px;text-align:center;">
+                        <i class="bi bi-link-45deg" style="font-size:3rem;color:#CBA35C;display:block;margin-bottom:16px;"></i>
+                        <p style="color:#5A5A5A;margin-bottom:20px;">Album của bạn được lưu trữ trên dịch vụ cloud bên ngoài.</p>
+                        <a href="@albumUrl" target="_blank" rel="noopener noreferrer"
+                           style="background:#CBA35C;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+                            <i class="bi bi-box-arrow-up-right"></i> Mở Album
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="dash-card p-5 text-center border border-secondary">
+                <i class="bi bi-images fs-1 text-secondary mb-3 d-block"></i>
+                <h5 class="text-white">Chưa có ảnh nội bộ</h5>
+                <p class="text-muted mb-0">Studio chưa upload ảnh lên hệ thống.</p>
+            </div>
+        }
+    }
+    else
+    {
+        @if (hasCloudUrl)
+        {
+            <!-- Google Drive embed when both cloud URL and local assets exist -->
+            <div style="background:#fff;border:1px solid #EDE8DF;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(43,43,43,0.06);margin-bottom:24px;">
+                <div style="padding:16px 20px;border-bottom:1px solid #EDE8DF;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <i class="bi bi-cloud-fill" style="color:#CBA35C;font-size:1.2rem;"></i>
+                        <span style="font-weight:600;color:#2B2B2B;font-size:0.95rem;">Album Cloud</span>
+                        @if (isGoogleDrive)
+                        {
+                            <span style="background:rgba(66,133,244,0.1);color:#4285F4;border:1px solid rgba(66,133,244,0.25);border-radius:50px;padding:3px 10px;font-size:0.75rem;font-weight:600;">
+                                <i class="bi bi-google me-1"></i>Google Drive
+                            </span>
+                        }
+                    </div>
+                    <a href="@albumUrl" target="_blank" rel="noopener noreferrer"
+                       style="border:1.5px solid #CBA35C;color:#CBA35C;border-radius:8px;padding:7px 16px;text-decoration:none;font-weight:600;font-size:0.85rem;display:inline-flex;align-items:center;gap:6px;"
+                       onmouseover="this.style.background='#CBA35C';this.style.color='#fff'"
+                       onmouseout="this.style.background='transparent';this.style.color='#CBA35C'">
+                        <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
+                    </a>
+                </div>
+                @if (isGoogleDrive)
+                {
+                    <iframe src="@embedUrl" style="width:100%;height:500px;border:none;display:block;" loading="lazy" title="Album Cloud"></iframe>
+                    <div style="padding:10px 20px;background:#FAF7F2;border-top:1px solid #EDE8DF;font-size:0.82rem;color:#6B6B6B;">
+                        <i class="bi bi-info-circle me-1" style="color:#CBA35C;"></i>
+                        Nếu album không hiển thị, nhấn <strong>"Mở trong tab mới"</strong>.
+                    </div>
+                }
+            </div>
+        }
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <button type="button" class="btn btn-sm btn-outline-light active" data-filter="all">Tất cả</button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-filter="favorite">
+                <i class="bi bi-heart-fill me-1"></i> Đã tim
+            </button>
+            <span class="text-muted small ms-2">Đang hiển thị theo ưu tiên ảnh tim gần nhất.</span>
+        </div>
+
+        <div class="row g-3">
+            @foreach (var a in orderedAssets)
+            {
+                <div class="col-6 col-md-4 col-lg-3 favorite-item" data-favorite="@(a.IsFavorite ? "true" : "false")">
+                    <div class="dash-card p-2 border border-secondary">
+                        <div class="d-flex justify-content-end mb-2">
+                            <form asp-action="ToggleFavorite" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="assetId" value="@a.Id" />
+                                <input type="hidden" name="bookingId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-sm @(a.IsFavorite ? "btn-danger" : "btn-outline-danger")">
+                                    <i class="bi @(a.IsFavorite ? "bi-heart-fill" : "bi-heart")"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <a href="@a.RelativePath" target="_blank" rel="noopener noreferrer">
+                            <img src="@a.RelativePath" alt="@a.FileName" class="img-fluid rounded" style="width: 100%; height: 200px; object-fit: cover;" />
+                        </a>
+                        <div class="text-muted small mt-2 text-truncate">@a.FileName</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const filterButtons = document.querySelectorAll('[data-filter]');
+            const items = document.querySelectorAll('.favorite-item');
+            const submitForm = document.getElementById('favorite-submit-form');
+            const submitBtn = document.getElementById('submit-favorite-btn');
+
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const filter = this.getAttribute('data-filter');
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    items.forEach(item => {
+                        const isFavorite = item.getAttribute('data-favorite') === 'true';
+                        item.style.display = (filter === 'all' || isFavorite) ? '' : 'none';
+                    });
+                });
+            });
+
+            // UI hardening: prevent double-click submit in short interval.
+            if (submitForm && submitBtn) {
+                submitForm.addEventListener('submit', function () {
+                    if (submitBtn.disabled) return;
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'Đang gửi...';
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText ?? 'Gửi ảnh đã chọn';
+                    }, 6000);
+                });
+            }
+        })();
+    </script>
+}
+
