@@ -74,9 +74,10 @@
             font-weight: 500;
             transition: all .2s ease;
             user-select: none;
+            position: relative;
         }
 
-        .time-slot-btn:hover {
+        .time-slot-btn:hover:not(.booked) {
             border-color: #CBA35C;
             color: #CBA35C;
             background: rgba(203,163,92,0.06);
@@ -89,6 +90,35 @@
             font-weight: 700;
             box-shadow: 0 4px 12px rgba(203,163,92,0.35);
         }
+
+        .time-slot-btn.booked {
+            background: #FEF2F2;
+            border-color: rgba(239,68,68,0.3);
+            color: #EF4444;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        .time-slot-btn.booked::after {
+            content: 'Đã đặt';
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: #EF4444;
+            margin-top: 2px;
+        }
+
+        .slot-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: #6B6B6B;
+        }
+
+        .slot-legend span { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
 
         /* Summary card */
         .summary-card {
@@ -212,16 +242,21 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Giờ Bắt Đầu</label>
-                                <div class="row g-2 mt-1">
+                                <div class="row g-2 mt-1" id="slot-grid">
                                     @{
                                         string[] slots = { "08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00" };
                                         foreach (var slot in slots)
                                         {
                                             <div class="col-4 col-md-3">
-                                                <div class="time-slot-btn" onclick="selectTime('@slot', this)">@slot</div>
+                                                <div class="time-slot-btn" data-slot="@slot" onclick="selectTime('@slot', this)">@slot</div>
                                             </div>
                                         }
                                     }
+                                </div>
+                                <div class="slot-legend">
+                                    <span><span class="legend-dot" style="background:#FAF7F2;border:1.5px solid #EDE8DF;"></span>Còn trống</span>
+                                    <span><span class="legend-dot" style="background:#CBA35C;"></span>Đang chọn</span>
+                                    <span><span class="legend-dot" style="background:#FEF2F2;border:1.5px solid rgba(239,68,68,0.3);"></span>Đã đặt</span>
                                 </div>
                                 <div id="time-error" style="display:none;color:#EF4444;font-size:.82rem;margin-top:6px;">
                                     <i class="bi bi-exclamation-circle me-1"></i>Vui lòng chọn giờ chụp.
@@ -277,20 +312,77 @@
 
 @section Scripts {
     <script>
+        let bookedSlots = [];
+
         function selectTime(time, element) {
+            if (element.classList.contains('booked')) return;
             document.getElementById('selected-time-input').value = time;
             document.getElementById('summary-time').innerText = time;
-            
-            // Highlight selected button
             document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
+            document.getElementById('time-error').style.display = 'none';
         }
 
         function updateSummaryDate(val) {
-            if (val) {
-                const date = new Date(val);
-                document.getElementById('summary-date').innerText = date.toLocaleDateString('vi-VN');
-            }
+            if (!val) return;
+            const date = new Date(val);
+            document.getElementById('summary-date').innerText = date.toLocaleDateString('vi-VN');
+
+            // Reset selected time when date changes
+            document.getElementById('selected-time-input').value = '';
+            document.getElementById('summary-time').innerText = 'Chưa chọn';
+            document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Fetch booked slots for selected date
+            fetchBookedSlots(val);
         }
+
+        async function fetchBookedSlots(date) {
+            const grid = document.getElementById('slot-grid');
+            grid.style.opacity = '0.5';
+            grid.style.pointerEvents = 'none';
+
+            try {
+                const res = await fetch(`/api/bookings/booked-slots?date=${date}`);
+                const data = await res.json();
+                bookedSlots = data.bookedSlots || [];
+            } catch {
+                bookedSlots = [];
+            }
+
+            // Update slot UI
+            document.querySelectorAll('.time-slot-btn').forEach(btn => {
+                const slot = btn.getAttribute('data-slot');
+                if (bookedSlots.includes(slot)) {
+                    btn.classList.add('booked');
+                    btn.classList.remove('active');
+                    if (document.getElementById('selected-time-input').value === slot) {
+                        document.getElementById('selected-time-input').value = '';
+                        document.getElementById('summary-time').innerText = 'Chưa chọn';
+                    }
+                } else {
+                    btn.classList.remove('booked');
+                }
+            });
+
+            grid.style.opacity = '1';
+            grid.style.pointerEvents = '';
+        }
+
+        // Validate before submit
+        document.getElementById('booking-form').addEventListener('submit', function (e) {
+            const time = document.getElementById('selected-time-input').value;
+            if (!time) {
+                e.preventDefault();
+                document.getElementById('time-error').style.display = 'block';
+                document.getElementById('slot-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+
+        // Auto-refresh booked slots every 30s if date is selected
+        setInterval(() => {
+            const dateInput = document.querySelector('input[name="bookingDate"]');
+            if (dateInput && dateInput.value) fetchBookedSlots(dateInput.value);
+        }, 30000);
     </script>
 }

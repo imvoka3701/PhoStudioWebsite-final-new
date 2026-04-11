@@ -111,5 +111,25 @@ public class BookingApiController : ControllerBase
 
         return Ok(packages);
     }
+
+    // GET /api/bookings/booked-slots?date=2026-04-15
+    [HttpGet("booked-slots")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetBookedSlots([FromQuery] string date)
+    {
+        if (!DateTime.TryParse(date, out var parsedDate))
+            return BadRequest(new { error = "Ngày không hợp lệ." });
+
+        var bookedSlots = await _db.Bookings
+            .Where(b =>
+                b.BookingDate == parsedDate.Date &&
+                b.Status != BookingStatus.Cancelled &&
+                !(b.Status == BookingStatus.TimeSlotLocked && b.LockExpirationTime <= VnNow))
+            .Select(b => b.StartTime.ToString(@"hh\:mm"))
+            .Distinct()
+            .ToListAsync();
+
+        return Ok(new { date = parsedDate.ToString("yyyy-MM-dd"), bookedSlots });
+    }
 }
 

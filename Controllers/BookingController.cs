@@ -100,7 +100,6 @@ namespace PhoStudioMVC.Controllers
                 return RedirectToAction(redirectAction, redirectRouteValues);
             }
 
-            // Validate required fields
             if (string.IsNullOrWhiteSpace(FullName))
             {
                 TempData["Error"] = "Vui lòng nhập họ và tên.";
@@ -131,22 +130,6 @@ namespace PhoStudioMVC.Controllers
                 return RedirectToAction(redirectAction, redirectRouteValues);
             }
 
-            // Step 1.2: Execute the Race Condition Prevention query (Rule #3)
-            bool isConflict = _context.Bookings.Any(b =>
-                b.BookingDate == bookingDate.Date &&
-                b.StartTime == startTimeParsed &&
-                (b.Status == BookingStatus.Deposited
-                 || b.Status == BookingStatus.ShootCompleted
-                 || b.Status == BookingStatus.FullyPaid
-                 || (b.Status == BookingStatus.TimeSlotLocked && b.LockExpirationTime > VnNow)));
-
-            if (isConflict)
-            {
-                TempData["Error"] = "Khung giờ này vừa có người đặt. Vui lòng chọn giờ khác.";
-                return RedirectToAction(redirectAction, redirectRouteValues);
-            }
-
-            // Step 1.3: Apply Rule #4 (Price Calc) and Rule #2 (15-min lock)
             var service = await _context.ServicePackages.FindAsync(ServicePackageId);
             if (service == null || !service.IsActive)
             {
@@ -154,43 +137,58 @@ namespace PhoStudioMVC.Controllers
                 return RedirectToAction("Packages");
             }
 
-            // Step 1.4: Map ClientId
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Combine customer info and notes using string.Join
-            var notesList = new List<string>
+            // ── Atomic check + insert inside a transaction to prevent race condition ──
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                $"Khách: {FullName}",
-                $"SĐT: {phone}"
-            };
-            if (!string.IsNullOrWhiteSpace(email))
-                notesList.Add($"Email: {email}");
-            if (!string.IsNullOrWhiteSpace(Notes))
-                notesList.Add($"Yêu cầu: {Notes}");
+                bool isConflict = await _context.Bookings.AnyAsync(b =>
+                    b.BookingDate == bookingDate.Date &&
+                    b.StartTime == startTimeParsed &&
+                    (b.Status == BookingStatus.Deposited
+                     || b.Status == BookingStatus.ShootCompleted
+                     || b.Status == BookingStatus.FullyPaid
+                     || (b.Status == BookingStatus.TimeSlotLocked && b.LockExpirationTime > VnNow)));
 
-            string combinedNotes = string.Join("\n", notesList);
+                if (isConflict)
+                {
+                    await transaction.RollbackAsync();
+                    TempData["Error"] = "Khung giờ này vừa có người đặt. Vui lòng chọn giờ khác.";
+                    return RedirectToAction(redirectAction, redirectRouteValues);
+                }
 
-            var newBooking = new Booking
+                var notesList = new List<string> { $"Khách: {FullName}", $"SĐT: {phone}" };
+                if (!string.IsNullOrWhiteSpace(email)) notesList.Add($"Email: {email}");
+                if (!string.IsNullOrWhiteSpace(Notes)) notesList.Add($"Yêu cầu: {Notes}");
+
+                var newBooking = new Booking
+                {
+                    ClientId = userId!,
+                    ServicePackageId = ServicePackageId,
+                    BookingDate = bookingDate.Date,
+                    StartTime = startTimeParsed,
+                    EndTime = startTimeParsed.Add(TimeSpan.FromMinutes(service.DurationMinutes)),
+                    TotalAmount = service.Price,
+                    DepositAmount = service.Price * 0.3m,
+                    Status = BookingStatus.TimeSlotLocked,
+                    WorkflowStatus = BookingWorkflowStatus.PendingReview,
+                    LockExpirationTime = VnNow.AddMinutes(15),
+                    Notes = string.Join("\n", notesList)
+                };
+
+                _context.Bookings.Add(newBooking);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return RedirectToAction("Payment", new { bookingId = newBooking.Id });
+            }
+            catch (Exception)
             {
-                ClientId = userId!,
-                ServicePackageId = ServicePackageId,
-                BookingDate = bookingDate.Date,
-                StartTime = startTimeParsed,
-                EndTime = startTimeParsed.Add(TimeSpan.FromMinutes(service.DurationMinutes)),
-                TotalAmount = service.Price,
-                DepositAmount = service.Price * 0.3m,
-                Status = BookingStatus.TimeSlotLocked,
-                WorkflowStatus = BookingWorkflowStatus.PendingReview,
-                LockExpirationTime = VnNow.AddMinutes(15),
-                Notes = combinedNotes
-            };
-
-            // Step 1.5: Save to DB
-            _context.Bookings.Add(newBooking);
-            await _context.SaveChangesAsync();
-
-            // Step 1.6: Redirect
-            return RedirectToAction("Payment", new { bookingId = newBooking.Id });
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Khung giờ này vừa có người đặt. Vui lòng chọn giờ khác.";
+                return RedirectToAction(redirectAction, redirectRouteValues);
+            }
         }
 
         [HttpPost]

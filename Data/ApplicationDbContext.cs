@@ -67,7 +67,13 @@ namespace PhoStudioMVC.Data
             //     .HasIndex(a => a.BookingId)
             //     .IsUnique();
 
-            // Unique index: prevent photographer double-booking same slot (except cancelled)
+            // Unique index: prevent double-booking same slot regardless of photographer assignment
+            modelBuilder.Entity<Booking>()
+                .HasIndex(b => new { b.BookingDate, b.StartTime })
+                .IsUnique()
+                .HasFilter($"[{nameof(Booking.Status)}] <> {(int)BookingStatus.Cancelled}");
+
+            // Unique index: prevent photographer assigned to 2 bookings at same slot
             modelBuilder.Entity<Booking>()
                 .HasIndex(b => new { b.BookingDate, b.StartTime, b.PhotographerId })
                 .IsUnique()
